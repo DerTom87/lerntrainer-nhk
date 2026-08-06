@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Naturheilkunde">
+  <meta name="theme-color" content="#3b7a57">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta charset="UTF-8">
+  <title>Naturheilkunde Lerntrainer</title>
+<style>
+  :root{
+    --bg:#f4f6f3; --card:#ffffff; --ink:#1c211d; --muted:#6b736c;
+    --line:#e2e7e0; --accent:#3b7a57; --accent-d:#2f6446; --accent-soft:#e4f0e8;
+    --blue:#2b6b8a; --gold:#b8860b;
+    --ok:#2f7a43; --ok-soft:#e3f0e6; --warn:#b8860b; --warn-soft:#f7eed5;
+    --bad:#a3322b; --bad-soft:#f6e2df;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:18px 16px 90px}
+  header{text-align:center;padding:12px 0 6px}
+  header h1{font-size:1.4rem;letter-spacing:-.02em;font-weight:700}
+  header .sub{color:var(--muted);font-size:.85rem;margin-top:2px}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .panel h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;font-weight:700}
+
+  /* Themenliste */
+  .thema{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:.15s;color:var(--ink)}
+  .thema:hover{border-color:var(--accent)}
+  .thema .no{flex:none;width:34px;height:34px;border-radius:9px;background:var(--accent-soft);color:var(--accent-d);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+  .thema .tt{flex:1}
+  .thema .tt b{display:block;font-size:1rem}
+  .thema .tt span{font-size:.8rem;color:var(--muted)}
+  .thema .arw{color:var(--muted);font-size:1.2rem}
+  .thema.locked{opacity:.5;cursor:not-allowed}
+  .thema.locked:hover{border-color:var(--line)}
+
+  /* Modus-Auswahl */
+  .modusrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  .modus{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:16px;cursor:pointer;text-align:center;transition:.15s}
+  .modus:hover{border-color:var(--accent)}
+  .modus .ic{line-height:1;color:var(--accent)}
+  .modus .ic svg{width:30px;height:30px}
+  .videocard .vic svg{width:24px;height:24px;color:var(--accent)}
+  .thema .arw svg,.thema .lock svg{width:18px;height:18px}
+  .thema .lock{color:var(--muted)}
+  .modus b{display:block;margin-top:8px;font-size:1rem}
+  .modus span{font-size:.78rem;color:var(--muted)}
+
+  .backbtn{background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:5px}
+  .backbtn:hover{color:var(--accent)}
+
+  .startbtn{width:100%;margin-top:14px;background:var(--accent);color:#fff;border:none;padding:14px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:.15s}
+  .startbtn:hover{background:var(--accent-d)}
+
+  /* Lernen */
+  .lesson h3{font-size:1.15rem;margin:2px 0 10px;color:var(--accent-d)}
+  .lesson h4{font-size:1rem;margin:16px 0 6px}
+  .lesson p{margin:8px 0}
+  .lesson ul{margin:8px 0 8px 20px}
+  .lesson li{margin:4px 0}
+  .lprog{font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:8px}
+  .merk{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:.92rem}
+  .merk b{color:var(--accent-d)}
+
+  /* Video */
+  .videocard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center}
+  .videocard .vic{flex:none;width:44px;height:44px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
+  .videocard .vt{flex:1}
+  .videocard .vt b{display:block;font-size:.95rem}
+  .videocard .vt span{font-size:.78rem;color:var(--muted)}
+  .vbtn{flex:none;background:var(--accent);color:#fff;text-decoration:none;font-size:.82rem;font-weight:600;padding:8px 12px;border-radius:9px}
+  .vbtn:hover{background:var(--accent-d)}
+  .videohint{font-size:.78rem;color:var(--muted);margin-top:6px;line-height:1.5}
+  .ownvideo{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--accent-soft)}
+  .ownvideo b{display:block;font-size:.98rem;color:var(--accent-d)}
+  .ownvideo span{font-size:.78rem;color:var(--muted)}
+  .ownvideo video{width:100%;border-radius:10px;margin-top:10px;display:block;background:#000}
+
+  /* Quiz */
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .qbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .qprog{flex:1;height:7px;background:var(--line);border-radius:4px;overflow:hidden}
+  .qprog > i{display:block;height:100%;background:var(--accent);width:0;transition:.3s}
+  .qcount{font-size:.78rem;color:var(--muted);white-space:nowrap}
+  .qtext{font-size:1.1rem;font-weight:600;margin:6px 0 14px;line-height:1.45}
+  .reveal{margin-top:14px;border-radius:11px;padding:15px;display:none;background:var(--ok-soft);border:1px solid #bfe0c8}
+  .reveal.show{display:block}
+  .reveal h4{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px;color:var(--accent-d)}
+  .reveal .body{font-size:.93rem}
+  .reveal .body p{margin:8px 0}
+  .reveal .body ul{margin:8px 0 4px 20px}
+  .reveal .body li{margin:4px 0}
+  .check{list-style:none;margin-top:10px}
+  .check li{padding:4px 0 4px 26px;position:relative;font-size:.9rem}
+  .check li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+  .btn{border:none;border-radius:11px;padding:13px;font-size:.95rem;font-weight:600;cursor:pointer;transition:.12s;width:100%}
+  .btn.primary{background:var(--accent);color:#fff}.btn.primary:hover{background:var(--accent-d)}
+  .btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+  .selfrow{display:flex;gap:8px;margin-top:12px}
+  .self{flex:1;border-radius:10px;padding:11px;font-size:.85rem;font-weight:600;cursor:pointer;border:1.5px solid var(--line);background:#fff}
+  .self.g{color:var(--ok)}.self.g:hover{background:var(--ok-soft);border-color:var(--ok)}
+  .self.y{color:var(--warn)}.self.y:hover{background:var(--warn-soft);border-color:var(--warn)}
+  .self.r{color:var(--bad)}.self.r:hover{background:var(--bad-soft);border-color:var(--bad)}
+  .btnrow{display:flex;gap:9px;margin-top:14px}
+
+  /* Wissenskarten */
+  .karte{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+  .karte b.tt{display:block;color:var(--accent-d);font-size:1rem;margin-bottom:4px}
+  .karte .kern{font-size:.92rem}
+  .karte .bsp{font-size:.86rem;color:var(--muted);margin-top:6px}
+
+  .result{text-align:center}
+  .ring{font-size:2.6rem;font-weight:700;margin:10px 0;color:var(--accent-d)}
+  footer{text-align:center;color:var(--muted);font-size:.74rem;margin-top:26px;line-height:1.6}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Naturheilkunde Lerntrainer</h1>
+    <div class="sub" id="subtitle">Für Rebecca · Weiterbildung Ernährungsberatung</div>
+  </header>
+
+  <!-- 1) Themen-Auswahl -->
+  <section id="view-home">
+    <div class="panel">
+      <h2>Modul 1 · Thema wählen</h2>
+      <div id="themenliste"></div>
+    </div>
+    <div class="panel">
+      <h2>Fortschritt</h2>
+      <div id="homeprog" style="font-size:.9rem;color:var(--muted)">Wähle ein Thema, um zu starten.</div>
+    </div>
+  </section>
+
+  <!-- 2) Modus-Auswahl -->
+  <section id="view-modus" class="hidden">
+    <button class="backbtn" onclick="goHome()">‹ Themenübersicht</button>
+    <div class="panel">
+      <h2 id="modus-thema">Thema</h2>
+      <div class="modusrow">
+        <div class="modus" onclick="startLernen()">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.8 5.6 9.2 5 7.5 5S4.2 5.6 3 6.5v12C4.2 17.6 5.8 17 7.5 17s3.3.6 4.5 1.5M12 6.5C13.2 5.6 14.8 5 16.5 5s3.3.6 4.5 1.5v12C19.8 17.6 18.2 17 16.5 17s-3.3.6-4.5 1.5M12 6.5v12"/></svg></div><b>Lernen</b><span>Stoff durcharbeiten</span>
+        </div>
+        <div class="modus" onclick="startUeben()">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19h4l9.5-9.5a1.9 1.9 0 0 0-2.7-2.7L5.3 16.3z"/><path d="M14 7.5l2.5 2.5"/></svg></div><b>Üben</b><span>Fragen beantworten</span>
+        </div>
+      </div>
+      <div class="modusrow" style="margin-top:10px">
+        <div class="modus" onclick="startVideos()">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10.5 9.2l4 2.8-4 2.8z"/></svg></div><b>Videos</b><span>Vortragsvideos</span>
+        </div>
+        <div class="modus" onclick="startKarten()">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="13" height="13" rx="2"/><path d="M7.5 20h9a2 2 0 0 0 2-2V9"/></svg></div><b>Wissenskarten</b><span>Zum Nachschlagen</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) Lernen -->
+  <section id="view-lernen" class="hidden">
+    <button class="backbtn" onclick="backToModus()">‹ Zurück</button>
+    <div class="lprog" id="lernprog"></div>
+    <div class="panel lesson" id="lessonbox"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="lprev" onclick="lessonStep(-1)">Zurück</button>
+      <button class="btn primary" id="lnext" onclick="lessonStep(1)">Weiter</button>
+    </div>
+  </section>
+
+  <!-- 4) Videos -->
+  <section id="view-videos" class="hidden">
+    <button class="backbtn" onclick="backToModus()">‹ Zurück</button>
+    <div class="panel">
+      <h2>Vortragsvideos · Modul 1</h2>
+      <div id="videoliste"></div>
+      <div class="videohint">Die Videos öffnen sich im AKN Campus (dort bist du eingeloggt) und spielen dort ab.</div>
+    </div>
+  </section>
+
+  <!-- 5) Wissenskarten -->
+  <section id="view-karten" class="hidden">
+    <button class="backbtn" onclick="backToModus()">‹ Zurück</button>
+    <div class="panel">
+      <h2 id="karten-thema">Wissenskarten</h2>
+      <div id="kartenliste"></div>
+    </div>
+  </section>
+
+  <!-- 6) Üben (Quiz) -->
+  <section id="view-quiz" class="hidden">
+    <div class="qbar">
+      <button class="backbtn" onclick="backToModus()">✕</button>
+      <div class="qprog"><i id="qprogbar"></i></div>
+      <div class="qcount" id="qcount"></div>
+    </div>
+    <div class="qcard" id="qcard"></div>
+  </section>
+
+  <!-- 7) Ergebnis -->
+  <section id="view-result" class="hidden">
+    <div class="panel result">
+      <div class="ring" id="resring"></div>
+      <p id="restext" style="color:var(--muted)"></p>
+      <div class="btnrow" style="margin-top:18px">
+        <button class="btn ghost" onclick="backToModus()">Zum Thema</button>
+        <button class="btn primary" onclick="startUeben()">Nochmal üben</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Privates Lernmaterial · nur zum persönlichen Gebrauch.<br>
+    Eigene Lernzusammenfassung zur laufenden Weiterbildung. Keine Weitergabe.
+  </footer>
+</div>
+
+<script>
+/* =========================================================================
+   DATEN — Modul 1. Jede Unit = ein Thema mit: lessons[], fragen[], karten[], videos[].
+   Aktuell befüllt: Unit 1. Units 2-7 werden nach und nach ergänzt.
+   ========================================================================= */
+const MODUL1_VIDEOS = [
+  {t:"Anamnese – Die ganzheitliche Grundlage jeder Beratung", d:"Vortragsvideo · ca. 1:31 h", url:"https://www.akncampus.com/mod/page/view.php?id=5834"},
+  {t:"Wenn Progesteron auf Cortisol trifft – die Stress-Kaskade", d:"Vortragsvideo", url:"https://www.akncampus.com/mod/page/view.php?id=5804"},
+  {t:"Smarte Ziele setzen", d:"Vortragsvideo", url:"https://www.akncampus.com/mod/page/view.php?id=5805"},
+  {t:"Schlaf, Hunger, Bewegung: Wie ein Kreislauf unsere Entscheidungen beeinflusst", d:"Vortragsvideo", url:"https://www.akncampus.com/mod/page/view.php?id=5806"},
+  {t:"Wenn Knochen leise schwächer werden – Osteoporose-Vorsorge", d:"Vortragsvideo", url:"https://www.akncampus.com/mod/page/view.php?id=5807"}
+];
+
+const THEMEN = [
+  {
+    id:"m1u1", nr:1, titel:"Der Aufbau des menschlichen Körpers",
+    unter:"Zelle, DNA, Chromosomen, Zellorganellen",
+    videos: [{t:"Erklärvideo: Die Zelle", d:"Animation mit Sprecher · ca. 1:45 Min", file:"_video/zelle/Die-Zelle.mp4"}].concat(MODUL1_VIDEOS),
+    lessons:[
+      {titel:"Der Code des Lebens", html:`
+        <p>Wie jedes Lebewesen basiert auch der Mensch auf Information – auf einem <b>Code</b>. Dieser Code heisst <b>DNA</b> (Desoxyribonukleinsäure). Die DNA ist ein grosses Molekül aus vielen kleineren Molekülen; Moleküle bestehen aus Atomen (den Grundbausteinen der Materie).</p>
+        <p>Die DNA trägt in codierter Form die einzigartige <b>Erbinformation</b> jedes Lebewesens. Sie steckt in nahezu jeder Körperzelle. Aber Information allein wird nicht zu Materie – wer setzt den Bauplan um? <b>Die Zelle selbst.</b></p>
+        <div class="merk"><b>Merke:</b> Atom → Molekül → DNA → Zelle. Der Mensch besteht aus ca. 30 Billionen Zellen.</div>`},
+      {titel:"Die Zelle und ihre Bestandteile", html:`
+        <p>Zellen bilden <b>Gewebe</b>, Gewebe bilden <b>Organe</b>, Organe bilden <b>Organsysteme</b> (z. B. Herz-Kreislauf-, Verdauungs-, Immunsystem). Alle zusammen bilden den Organismus.</p>
+        <h4>Grundaufbau der Zelle</h4>
+        <ul>
+          <li><b>Zellmembran</b> – schützende Hülle, reguliert den Stofftransport; trägt Rezeptoren („Antennen"), an die Botenstoffe andocken (Schlüssel-Schloss-Prinzip).</li>
+          <li><b>Zellplasma</b> – wässrige Grundsubstanz, umgibt die Zellorganellen.</li>
+          <li><b>Zellkern</b> – die „Zentrale", enthält die DNA.</li>
+        </ul>
+        <div class="merk">Freie Radikale können die Zellmembran schädigen. <b>Antioxidantien</b> schützen davor.</div>`},
+      {titel:"DNA, Gene, Chromosomen", html:`
+        <p>Die DNA besteht aus <b>Nukleotiden</b> (Zucker + Phosphat + Base). Es gibt vier Basen: <b>A, C, G, T</b>. Ihre Reihenfolge ist der genetische Code.</p>
+        <ul>
+          <li><b>Gen:</b> Immer drei Basen (Dreiercode) stehen für eine Aminosäure. Alle Dreiercodes für ein Protein bilden ein Gen.</li>
+          <li><b>Chromosom:</b> Die DNA liegt als Chromosomen vor. Der Mensch hat <b>46 Chromosomen</b> (23 Paare) – je zur Hälfte von Mutter und Vater.</li>
+          <li><b>Geschlecht:</b> Frauen XX, Männer XY.</li>
+        </ul>
+        <p>Abweichungen (zu viele/wenige Chromosomen) können zu Erkrankungen führen, z. B. Trisomie 21 (Chromosom 21 dreifach) – hier ist antioxidantien- und folatreiche Ernährung besonders wichtig.</p>`},
+      {titel:"Die Zellorganellen", html:`
+        <p>Die „Abteilungen" der Zelle mit je eigener Aufgabe:</p>
+        <ul>
+          <li><b>Endoplasmatisches Retikulum (ER):</b> Stofftransport in der Zelle, mit den Ribosomen an der Proteinsynthese beteiligt.</li>
+          <li><b>Ribosomen:</b> bauen die Proteine auf (nach der RNA-Kopie der DNA).</li>
+          <li><b>Golgi-Apparat:</b> schleust die fertigen Proteine aus der Zelle.</li>
+          <li><b>Mitochondrien:</b> die „<b>Kraftwerke</b>" – erzeugen aus Kohlenhydraten und Fetten Energie in Form von <b>ATP</b> (Zellatmung: Sauerstoff rein, CO₂ raus).</li>
+        </ul>
+        <div class="merk">Werden Mitochondrien durch freie Radikale geschädigt, fehlt der Zelle Energie – Antioxidantien puffern das ab.</div>`},
+      {titel:"Zusammenfassung", html:`
+        <ul>
+          <li>Atom → Molekül → Zelle → Gewebe → Organ → Organsystem → Organismus.</li>
+          <li>Die DNA (im Zellkern, als Chromosomen) ist der Bauplan; Gene codieren Proteine.</li>
+          <li>Zellorganellen erledigen die Arbeit: ER + Ribosomen (Proteine), Golgi (Export), Mitochondrien (Energie/ATP).</li>
+          <li>Freie Radikale schädigen Zellen; Antioxidantien schützen.</li>
+        </ul>
+        <div class="merk"><b>Fazit:</b> Ist die Zelle gesund, ist auch der Mensch gesund.</div>`}
+    ],
+    karten:[
+      {tt:"Die Zelle", kern:"Kleinste lebensfähige Einheit. Aufbau: Zellmembran (Hülle), Zellplasma (Grundsubstanz), Zellkern (Zentrale mit DNA).", bsp:"Ca. 30 Billionen Zellen bilden den Menschen."},
+      {tt:"DNA & Gene", kern:"DNA = Erbinformation aus Nukleotiden (Basen A,C,G,T). Drei Basen = eine Aminosäure. Ein Gen = alle Dreiercodes für ein Protein.", bsp:"46 Chromosomen (23 Paare), je hälftig von Vater und Mutter."},
+      {tt:"Mitochondrien", kern:"Die »Kraftwerke« der Zelle. Erzeugen Energie (ATP) aus Kohlenhydraten und Fetten – Vorgang: Zellatmung (O₂ rein, CO₂ raus).", bsp:"Energiereiche Zellen (Muskel, Nerv, Herz) haben besonders viele."},
+      {tt:"Freie Radikale & Antioxidantien", kern:"Freie Radikale (instabile Moleküle) schädigen Zellmembran, Proteine, DNA und Mitochondrien → oxidativer Stress. Antioxidantien neutralisieren sie.", bsp:"Antioxidantienreiche Ernährung beugt Zellschäden vor."}
+    ],
+    fragen:[
+      {frage:"Ordne nach Grösse/Komplexität (kleinste zuerst): Chromosom, Zelle, Körper, Molekül, Zellkern, Gewebe, Atom, Organ, DNA, Nukleotid.",
+       muster:"Atom – Molekül – Nukleotid – DNA – Chromosom – Zellkern – Zelle – Gewebe – Organ – Körper.",
+       check:["Atom ist die kleinste Einheit","Körper die grösste","Nukleotid vor DNA vor Chromosom"]},
+      {frage:"Erkläre den Grundaufbau der Zelle und nenne die vier wichtigsten Zellorganellen mit Hauptaufgabe.",
+       muster:"Die Zelle besteht aus Zellkern und Zellorganellen im Zellplasma, umhüllt von der Zellmembran. Die wichtigsten Organellen:<ul><li>ER (Stofftransport)</li><li>Ribosomen (Proteinaufbau)</li><li>Golgi-Apparat (Proteinexport)</li><li>Mitochondrien (Energie/ATP)</li></ul>",
+       check:["Zellmembran, Zellplasma, Zellkern genannt","ER, Ribosomen, Golgi, Mitochondrien","jeweils Hauptaufgabe"]},
+      {frage:"Wieso bezeichnet man die Mitochondrien als »Kraftwerke« der Zellen?",
+       muster:"Sie wandeln die gebundene Energie der Nahrung in eine für die Zelle verwertbare Form (ATP) um und liefern so die Kraft für alle Körperfunktionen.",
+       check:["Energie aus Nahrung","in verwertbare Form (ATP)","versorgt Körperfunktionen"]},
+      {frage:"Was unterscheidet die Mitochondrien vom endoplasmatischen Retikulum (ER)?",
+       muster:"Mitochondrien = Kraftwerke: stellen aus Kohlenhydraten und Fetten Energie (ATP) her. Das ER ist ein weit verzweigtes Hohlraumsystem für den Stofftransport und (mit den Ribosomen) für die Proteinsynthese.",
+       check:["Mitochondrien = Energie/ATP","ER = Stofftransport","ER + Ribosomen = Proteinsynthese"]},
+      {frage:"In welchem Zusammenhang steht der Golgi-Apparat zum ER?",
+       muster:"Im ER transportierte Proteine gelangen in den Golgi-Apparat, der sie dann aus der Zelle hinausbefördert.",
+       check:["Proteine kommen vom ER","Golgi exportiert sie aus der Zelle"]},
+      {frage:"Hat jeder Zelltyp gleich viele Mitochondrien, oder gibt es Unterschiede? Warum?",
+       muster:"Unterschiede: Zellen mit hohem Energiebedarf haben mehr Mitochondrien – z. B. Muskel-, Nerven- und Herzzellen (Bewegung, Synthese, aktiver Transport).",
+       check:["Unterschiede ja","mehr bei hohem Energiebedarf","Beispiele: Muskel-/Nerven-/Herzzellen"]},
+      {frage:"Erläutere, wie die Zelle bestimmte Stoffe hineinlässt.",
+       muster:"Über Rezeptoren an der Zellmembran: ein Botenstoff (z. B. Insulin) dockt an (Schlüssel-Schloss-Prinzip), öffnet einen Kanal, und ein bestimmter Stoff (z. B. Glucose) gelangt in die Zelle.",
+       check:["Rezeptoren an der Membran","Botenstoff dockt an (Schlüssel-Schloss)","Kanal öffnet, Stoff gelangt hinein"]},
+      {frage:"Was geschieht, wenn Mitochondrien durch freie Radikale geschädigt werden?",
+       muster:"Geschädigte Mitochondrien liefern nicht mehr genug Energie für die Zellstoffwechselprozesse. Geht ein Grossteil zugrunde, kann das das Ende der Zelle bedeuten.",
+       check:["zu wenig Energie","Stoffwechsel gestört","im Extremfall Zelltod"]},
+      {frage:"Wie wird die Information eines Gens auf ein Protein übertragen?",
+       muster:"Im Zellkern wird eine Kopie der DNA erstellt (RNA). Sie wandert zu den Ribosomen, die den Code ablesen und passend zu den Dreiercodes Aminosäuren zu einem Protein verknüpfen.",
+       check:["RNA-Kopie der DNA","Ribosomen lesen den Code","Aminosäuren → Protein"]}
+    ]
+  },
+  {
+    id:"m1u2", nr:2, titel:"Das Herz-Kreislauf-System",
+    unter:"Gefässe, Herz, Blut, Erkrankungen",
+    videos: MODUL1_VIDEOS,
+    lessons:[
+      {titel:"Überblick: Der Kreislauf", html:`
+        <p>Das Herz-Kreislauf-System versorgt alle Organe und Gewebe mit <b>Blut</b> – es verteilt Sauerstoff und Nährstoffe und transportiert Abfallstoffe (aus dem Zellstoffwechsel) ab.</p>
+        <p>Es besteht aus drei Teilen:</p>
+        <ul><li><b>den Gefässen</b> (die Leitungen)</li><li><b>dem Herzen</b> (die Pumpe)</li><li><b>dem Blut</b> (das Transportmittel)</li></ul>
+        <p>Das Blut wird vom Herzen durch die Gefässe getrieben – ohne Anfang und Ende, wie in einem <b>Kreis</b>. Herz und Blut machen nie Pause.</p>
+        <div class="merk"><b>Merke:</b> Je besser das Blut fliesst, desto gesünder der Mensch.</div>`},
+      {titel:"Das Gefässsystem", html:`
+        <p>Es gibt <b>Blutgefässe</b> und <b>Lymphgefässe</b>. Drei Arten von Blutgefässen:</p>
+        <ul>
+          <li><b>Arterien</b> – führen <b>vom</b> Herzen weg; darin fliesst sauerstoffreiches Blut. Grösste Arterie: die <b>Aorta</b>. (Ausnahme: die Lungenarterie führt sauerstoffarmes Blut.)</li>
+          <li><b>Venen</b> – führen <b>zum</b> Herzen hin; darin fliesst sauerstoffarmes Blut. (Ausnahme: die Lungenvenen führen sauerstoffreiches Blut.)</li>
+          <li><b>Kapillaren</b> – feinste Haargefässe, verbinden Arterien und Venen und versorgen jede einzelne Zelle.</li>
+        </ul>
+        <p>Die <b>Lymphgefässe</b> sind kein Kreislauf. Sie nehmen überschüssige Flüssigkeit aus dem Gewebe auf (Drainage), reinigen sie in den Lymphknoten und geben sie an die Venen ab. Sie haben keine Pumpe – die Lymphe fliesst durch <b>Bewegung</b> (Muskeln, Atmung).</p>
+        <div class="merk">Wenig Bewegung → langsamer Lymphfluss → Entgiftung stockt.</div>`},
+      {titel:"Das Herz", html:`
+        <p>Das Herz ist ein <b>Hohlmuskel</b>, der das Blut durch den Körper pumpt – und weit mehr als eine Pumpe: es hat ein eigenes Nervennetz (ein „kleines Gehirn"), beeinflusst Gefühle und Hormonhaushalt und bildet in kleinen Mengen das „Liebeshormon" Oxytocin.</p>
+        <h4>Aufbau: 2 Hälften, je Vorhof + Kammer</h4>
+        <p>Der Blutweg: <b>rechter Vorhof</b> (sammelt sauerstoffarmes Blut aus dem Körper) → <b>rechte Kammer</b> → Lungenarterie → <b>Lunge</b> (Sauerstoff auftanken) → Lungenvenen → <b>linker Vorhof</b> → <b>linke Kammer</b> → Aorta → in den ganzen Körper.</p>
+        <p>Vier <b>Herzklappen</b> (2 Segel-, 2 Taschenklappen) wirken wie Ventile und sorgen dafür, dass das Blut nur in eine Richtung fliesst.</p>`},
+      {titel:"Das Blut", html:`
+        <p>Blut ist ein <b>flüssiges Gewebe</b> (pH ca. 7,4). Es besteht zu ca. <b>55 % aus Plasma</b> (über 90 % Wasser) und <b>45 % aus Blutzellen</b>:</p>
+        <ul>
+          <li><b>Erythrozyten</b> (rote Blutkörperchen) – transportieren Sauerstoff.</li>
+          <li><b>Leukozyten</b> (weisse Blutkörperchen) – Abwehr von Krankheitserregern.</li>
+          <li><b>Thrombozyten</b> (Blutplättchen) – Blutstillung und -gerinnung.</li>
+        </ul>
+        <p><b>Aufgaben des Blutes:</b> Transport (Sauerstoff, Nährstoffe, Hormone, Abfall), Abwehr, Wärmeregulierung, Wundheilung.</p>
+        <h4>Blutdruck</h4>
+        <p>Der Druck des Blutes auf die Gefässwände. <b>Systolisch</b> = beim Pumpen (Herz zieht sich zusammen), <b>diastolisch</b> = in der Ruhephase. Normalwert Erwachsener: bis <b>120/80 mmHg</b>.</p>`},
+      {titel:"Häufige Erkrankungen", html:`
+        <p><b>Arteriosklerose</b> (Arterienverkalkung): Ablagerungen aus Fett, Cholesterin und Calcium machen die Arterien enger und steifer. Entwickelt sich über Jahrzehnte. Mögliche Folgen: <b>Bluthochdruck</b>, <b>Herzinfarkt</b> (Verschluss eines Herzkranzgefässes), <b>Schlaganfall</b> (Verschluss im Gehirn) und <b>Angina Pectoris</b> (beengender Brustschmerz durch Mangeldurchblutung des Herzens).</p>
+        <h4>Naturheilkundlicher Blick</h4>
+        <ul>
+          <li>Freie Radikale schädigen die Gefässwände und oxidieren das „schlechte" LDL-Cholesterin → Ablagerungen. Antioxidantien schützen.</li>
+          <li>Ungünstig: viel Zucker/isolierte Kohlenhydrate, Übermass an Omega-6, Trans-Fette, Übersäuerung.</li>
+          <li>Wichtig: Omega-3, Magnesium (entzündungshemmend, krampflösend), Vitamin C (Gefäss-Reparatur), Vitamin K2 (lenkt Calcium in die Knochen).</li>
+        </ul>`}
+    ],
+    karten:[
+      {tt:"Arterien & Venen", kern:"Arterien führen vom Herzen weg (sauerstoffreich), Venen zum Herzen hin (sauerstoffarm). Ausnahme: Lungengefässe umgekehrt. Kapillaren = feinste Haargefässe, versorgen jede Zelle.", bsp:"Grösste Arterie: die Aorta."},
+      {tt:"Der Blutweg durchs Herz", kern:"Rechter Vorhof → rechte Kammer → Lunge (Sauerstoff) → linker Vorhof → linke Kammer → Aorta → Körper. Vier Klappen sorgen für die richtige Richtung.", bsp:"Rechte Seite = sauerstoffarm, linke Seite = sauerstoffreich."},
+      {tt:"Die Blutzellen", kern:"Erythrozyten (rot) = Sauerstofftransport; Leukozyten (weiss) = Abwehr; Thrombozyten = Blutgerinnung. Blut = 55 % Plasma + 45 % Zellen.", bsp:"Alle drei entstehen im Knochenmark."},
+      {tt:"Blutdruck", kern:"Systolisch = Druck beim Pumpen, diastolisch = Druck in der Ruhephase. Gemessen in mmHg.", bsp:"Normal: bis 120/80 mmHg."},
+      {tt:"Arteriosklerose", kern:"Ablagerungen (Fett, Cholesterin, Calcium) verengen und versteifen die Arterien. Risiko: freie Radikale, oxidiertes LDL, Zucker, Übersäuerung, Nährstoffmangel.", bsp:"Mögliche Folgen: Bluthochdruck, Herzinfarkt, Schlaganfall."}
+    ],
+    fragen:[
+      {frage:"Was ist die Hauptaufgabe des Herzens?", muster:"Das Blut durch den gesamten Organismus zu pumpen, sodass selbst entlegenste Bereiche des Körpers angemessen durchblutet werden.", check:["Blut durch den Körper pumpen","alle Bereiche durchbluten"]},
+      {frage:"Aus welchen Blutgefässen setzt sich das Blutgefässsystem zusammen?", muster:"Das Blutgefässsystem setzt sich aus fünf Arten zusammen:<ul><li>Arterien</li><li>Arteriolen</li><li>Kapillaren</li><li>Venolen</li><li>Venen</li></ul>", check:["Arterien (+ Arteriolen)","Kapillaren","Venen (+ Venolen)"]},
+      {frage:"Wie unterscheidet sich das arterielle vom venösen System?", muster:"Arterien führen sauerstoffreiches Blut vom Herzen zu den Organen (Ausnahme: Lungenarterie sauerstoffarm). Venen führen sauerstoffarmes Blut von den Organen zum Herzen (Ausnahme: Lungenvenen sauerstoffreich).", check:["Arterien: weg vom Herzen, sauerstoffreich","Venen: zum Herzen, sauerstoffarm","Ausnahme Lungengefässe"]},
+      {frage:"Teile das Herz grob in 4 Bereiche und nenne die Aufgabe jedes Bereichs.", muster:"Das Herz hat vier Bereiche mit je eigener Aufgabe:<ul><li>Rechter Vorhof: sammelt sauerstoffarmes Blut aus dem Körper</li><li>Rechte Kammer: presst es in die Lungenarterie zur Lunge</li><li>Linker Vorhof: nimmt das in der Lunge mit Sauerstoff angereicherte Blut auf</li><li>Linke Kammer: pumpt das sauerstoffreiche Blut über die Aorta in den Körper</li></ul>", check:["rechter Vorhof + rechte Kammer (zur Lunge)","linker Vorhof + linke Kammer (in den Körper)","sauerstoffarm rechts, sauerstoffreich links"]},
+      {frage:"Welche Aufgaben hat das Blut?", muster:"Das Blut erfüllt vier Aufgaben:<ul><li>Transportfunktion</li><li>Abwehrfunktion</li><li>Wärmeregulierung</li><li>Wundheilung</li></ul>", check:["Transport","Abwehr","Wärmeregulierung","Wundheilung"]},
+      {frage:"Wie heissen die 3 Blutzelltypen und welche Aufgabe haben sie?", muster:"Die drei Blutzelltypen und ihre Aufgaben:<ul><li>Erythrozyten (rote) transportieren Sauerstoff</li><li>Leukozyten (weisse) wehren Krankheitserreger ab</li><li>Thrombozyten (Blutplättchen) sorgen für die Blutgerinnung/Blutstillung</li></ul>", check:["Erythrozyten – Sauerstoff","Leukozyten – Abwehr","Thrombozyten – Gerinnung"]},
+      {frage:"Welche Werte beschreiben den Blutdruck und was sagen sie aus?", muster:"Der systolische Wert misst den Druck während des Pumpvorgangs des Herzens; der diastolische Wert den Druck in der Entspannungsphase.", check:["systolisch = beim Pumpen","diastolisch = Ruhephase"]},
+      {frage:"Was versteht man unter Arteriosklerose?", muster:"Eine langsam fortschreitende Schädigung der Arterien mit Verengung und Versteifung – dadurch Mangeldurchblutung und Unterversorgung von Geweben und Organen mit Sauerstoff und Nährstoffen.", check:["Schädigung der Arterien","Verengung/Versteifung","Mangeldurchblutung"]},
+      {frage:"Nenne drei Risikofaktoren, die eine Arteriosklerose begünstigen.", muster:"Zum Beispiel:<ul><li>ungesunde Lebensweise (Überschuss an freien Radikalen → Gefässschäden und Cholesterinablagerung)</li><li>Vitamin-K2-Mangel (Calcium lagert sich in den Gefässwänden ab)</li><li>zu hoher Blutzuckerspiegel (schädigt die Gefässwände)</li></ul>", check:["freie Radikale / ungesunde Lebensweise","Vitamin-K2-Mangel","hoher Blutzucker"]},
+      {frage:"Welcher Zusammenhang besteht zwischen Ablagerungen und erhöhtem Blutdruck?", muster:"Ablagerungen verengen die Gefässe und machen sie steifer. Damit alle Bereiche versorgt bleiben, muss der Körper den Blutdruck anheben. Bluthochdruck kann Folge – aber auch Ursache – von Arteriosklerose sein.", check:["Gefässe enger und steifer","Körper hebt Blutdruck an","Wechselwirkung in beide Richtungen"]},
+      {frage:"Wie wirken Betablocker – und welche Nachteile kann die medikamentöse Blutdrucksenkung haben?", muster:"Betablocker senken Herzfrequenz und -kraft, indem sie blutdruckerhöhende Botenstoffe hemmen. Durch die geringere Pumpleistung können Bereiche schlechter durchblutet werden. Mögliche Nebenwirkungen:<ul><li>kalte Hände und Füsse</li><li>Schwindel</li><li>Potenzstörungen</li><li>geringere Leistungsfähigkeit</li></ul>", check:["senken Herzfrequenz und -kraft","geringere Pumpleistung","Nebenwirkungen (kalte Extremitäten, Schwindel …)"]},
+      {frage:"Welche Faktoren tragen dazu bei, dass die feinen Kapillaren schlecht durchblutet werden?", muster:"Ablagerungen in den grösseren Gefässen; und Übersäuerung, durch die auch die roten Blutkörperchen steif werden und sich nicht mehr durch die feinsten Gefässe zwängen können. Beides verlangsamt den Blutfluss → Unterversorgung.", check:["Ablagerungen in den Gefässen","steife rote Blutkörperchen (Übersäuerung)","langsamerer Blutfluss"]},
+      {frage:"Unter welchen Voraussetzungen entsteht ein Herzinfarkt?", muster:"Wenn sich in den Herzkranzgefässen arteriosklerotische Ablagerungen bilden und diese das Gefäss so verengen (oder ein zusätzliches Blutgerinnsel es ganz verstopft), dass es zum Verschluss kommt.", check:["Herzkranzgefässe betroffen","Ablagerungen + evtl. Blutgerinnsel","Gefässverschluss"]},
+      {frage:"Was ist Angina Pectoris, wie entsteht sie, und wieso trägt Stress dazu bei?", muster:"Ein beengender Brustschmerz durch mangelhafte Sauerstoffversorgung des Herzens (unzureichende Durchblutung), meist durch verengte Herzkranzgefässe (Arteriosklerose). Psychische Belastung und Stress verengen die Gefässe zusätzlich und können einen Anfall auslösen.", check:["beengender Brustschmerz","Mangeldurchblutung des Herzens","Stress verengt Gefässe zusätzlich"]}
+    ]
+  },
+  {
+  id:"m1u3", nr:3, titel:"Das Atmungssystem",
+  unter:"Atemwege, Bronchien, Lunge, Gasaustausch, Erkrankungen",
+  videos: MODUL1_VIDEOS,
+  lessons:[
+    {titel:"Überblick", html:`
+      <p>Das <b>Atmungssystem</b> des Menschen besteht aus der Nase, der Luftröhre, den <b>Bronchien</b> und der <b>Lunge</b>. Beim Atmen strömt die Luft durch Nase oder Mund in die Luftröhre und von dort in ein weit verzweigtes Röhrensystem, das die Atemluft in der Lunge verteilt.</p>
+      <p>Die Luftröhre teilt sich im Brustkorb auf Höhe der Lungen in zwei Röhren: den rechten und den linken <b>Hauptbronchus</b>. Sie führen jeweils in einen Lungenflügel.</p>
+      <div class="merk"><b>Merke:</b> Die eigentliche Aufgabe der Lunge und der Bronchien ist die Atmung, und Atmung bedeutet Gasaustausch: Sauerstoffaufnahme beim Einatmen und Kohlendioxidabgabe beim Ausatmen.</div>`},
+    {titel:"Aufbau der Bronchien", html:`
+      <p>Die Hauptbronchien wirken wie die Stämme eines Baumes, die sich in den Lungen immer weiter verzweigen. Ihre Äste werden dünner, ihre Verästelungen dichter. Die feinsten Zweige heissen <b>Bronchiolen</b>.</p>
+      <ul>
+        <li>Luftröhre: Durchmesser etwa 2 Zentimeter</li>
+        <li>Bronchiolen: nur noch maximal 1 Millimeter</li>
+        <li><b>Alveolen</b> (Lungenbläschen) am Ende der Bronchiolen: etwa 0,2 Millimeter</li>
+      </ul>
+      <p>Die Alveolen bilden mit ihren luftgefüllten Wänden das eigentliche Lungengewebe. Im Bild des Baumes sind sie die Blätter, denn hier findet der Gasaustausch statt.</p>
+      <div class="merk"><b>Merke:</b> Der Mensch besitzt je nach Lungengrösse rund 300 bis 800 Millionen Alveolen.</div>`},
+    {titel:"Schleimhaut und Gasaustausch", html:`
+      <p>Die Bronchien sind mit einer <b>Schleimhaut</b> ausgekleidet, die mit feinsten <b>Flimmerhärchen</b> besetzt ist. Die Zellen bilden Schleim, der eintreffende Fremdkörper wie Staub, Pollen oder Rauchpartikel einhüllt. Die Flimmerhärchen transportieren den Schleim mitsamt Fremdkörpern zurück Richtung Luftröhre, wo er ausgehustet wird.</p>
+      <p>Parallel zu den Bronchien verlaufen Arterien und Venen. Auf Höhe der Alveolen bilden sie ein feines <b>Kapillarnetz</b>. Hier läuft der Gasaustausch:</p>
+      <ul>
+        <li>Der Sauerstoff dringt durch die Wand der Alveolen ins Blut der Kapillaren.</li>
+        <li>Das Kohlendioxid nimmt den umgekehrten Weg aus dem Blut in die Alveolen und wird ausgeatmet.</li>
+      </ul>
+      <h4>Lungenkreislauf</h4>
+      <p>Sauerstoffarmes, kohlendioxidreiches Blut wird vom Herzen über die <b>Lungenarterie</b> zur Lunge transportiert. An den Alveolen gibt es Kohlendioxid ab und nimmt Sauerstoff auf. Über die <b>Lungenvene</b> fliesst das nun frische Blut zum Herzen zurück und wird von dort im ganzen Körper verteilt.</p>`},
+    {titel:"Lunge, Brustfell und Pleuraspalt", html:`
+      <p>Die Lunge ist ein <b>paariges Organ</b> aus zwei Lungenflügeln. Der rechte hat drei Lungenlappen, der linke nur zwei (der linke gibt dem Herzen Platz).</p>
+      <h4>Das Brustfell (Pleura)</h4>
+      <p>Die Lungenflügel werden vom Brustfell überzogen, zwei glatten, glänzenden Häuten:</p>
+      <ul>
+        <li>Die innere Haut heisst <b>Lungenfell</b>, sie ist mit den Lungenflügeln verwachsen.</li>
+        <li>Die äussere Haut heisst <b>Rippenfell</b>, sie kleidet die Brusthöhle aus und haftet an Rippen und Zwerchfell.</li>
+      </ul>
+      <h4>Der Pleuraspalt</h4>
+      <p>Zwischen Lungen- und Rippenfell liegt ein schmaler, mit Flüssigkeit gefüllter Spalt, der <b>Pleuraspalt</b> (auch Pleurahöhle oder Gleitspalt). Er sorgt dafür, dass sich Lunge und Brustkorb gegeneinander verschieben können, ohne sich voneinander zu lösen. Im Pleuraspalt herrscht ein <b>Unterdruck</b>. Dringt Luft ein, etwa bei einer Verletzung, bricht der Unterdruck zusammen und die Lunge kann kollabieren, man spricht dann von einem <b>Pneumothorax</b>, einer lebensbedrohlichen Situation.</p>`},
+    {titel:"Das Zwerchfell", html:`
+      <p>Das <b>Zwerchfell</b> ist eine kuppelförmige Scheidewand aus Muskeln und Sehnen, die den Brustraum vom Bauchraum trennt. Es hat Öffnungen für die untere Hohlvene, die Körperschlagader und die Speiseröhre.</p>
+      <p>Da die Lunge keine eigene Muskulatur besitzt, ist sie auf die umgebenden Muskeln angewiesen. Das Zwerchfell ist der <b>wichtigste Atemmuskel</b>:</p>
+      <ul>
+        <li>Beim <b>Einatmen</b> zieht es sich zusammen, drückt die Baucheingeweide nach unten und macht der Lunge Platz zum Ausdehnen.</li>
+        <li>Beim <b>Ausatmen</b> erschlafft es, verschiebt sich Richtung Brustraum und verkleinert den Lungenraum wieder.</li>
+      </ul>
+      <div class="merk"><b>Merke:</b> Ohne Zwerchfell könnten wir nicht atmen. Fällt es aus, kommt die Sauerstoffversorgung zum Erliegen.</div>`},
+    {titel:"Erkrankungen des Atmungssystems", html:`
+      <p>Tabakrauch enthält etwa 300 Schadstoffe. Viele Lungenkrankheiten betreffen daher bevorzugt Raucher, Passivraucher oder Menschen mit hoher Staub- oder Chemikalienbelastung.</p>
+      <h4>Raucherlunge (COPD)</h4>
+      <p>Umgangssprachlich meint die Raucherlunge die <b>chronisch obstruktive Lungenerkrankung</b> (COPD). Sie umfasst das <b>Lungenemphysem</b> und die <b>chronisch obstruktive Bronchitis</b>. Symptome sind Husten, Auswurf und Atemnot mit Enge im Brustraum.</p>
+      <ul>
+        <li><b>Lungenemphysem:</b> Die Alveolen werden überdehnt und platzen, die Atemwege verlieren ihre Elastizität. Die Schäden sind meist nicht mehr umkehrbar.</li>
+        <li><b>Bronchitis:</b> Entzündung der Schleimhäute der grösseren Bronchien mit Husten und Auswurf. Akut meist durch einen grippalen Infekt, chronisch vor allem durch Rauchen.</li>
+        <li><b>Asthma bronchiale:</b> Anfallsartige Luftnot durch chronische Entzündung der Bronchialschleimhäute bis in die Bronchiolen. Schleimhaut schwillt an, bildet vermehrt Schleim, die Bronchialmuskulatur verkrampft, die Bronchien verengen sich.</li>
+      </ul>
+      <h4>Ganzheitliche Massnahmen bei Asthma</h4>
+      <p>Empfohlen werden unter anderem Darmsanierung und Entsäuerung, das Meiden von Zusatzstoffen und Milchprodukten, entzündungshemmende Omega-3-Fettsäuren, Gewichtsreduktion, biologische Haushaltsreiniger, spezielle Atemtechniken sowie reizmildernde Kräuter wie Ingwer, Thymian oder Spitzwegerich.</p>`}
+  ],
+  karten:[
+    {tt:"Aufbau der Bronchien", kern:"Die Bronchien gliedern sich von gross nach klein in Hauptbronchien, Bronchiolen und Alveolen.", bsp:"Bild vom Baum: Hauptbronchus = Stamm, Bronchiolen = feinste Zweige, Alveolen = Blätter."},
+    {tt:"Gasaustausch in den Alveolen", kern:"In den Alveolen wird Sauerstoff ans Blut abgegeben und Kohlendioxid aus dem Blut aufgenommen.", bsp:"Rund um die Alveolen liegt ein feines Kapillarnetz, das den Austausch ermöglicht."},
+    {tt:"Schleimhaut mit Flimmerhärchen", kern:"Die Bronchialschleimhaut hüllt Fremdkörper in Schleim, die Flimmerhärchen transportieren sie Richtung Luftröhre.", bsp:"So werden Staub, Pollen und Rauchpartikel abgehustet."},
+    {tt:"Brustfell und Pleuraspalt", kern:"Innere Haut = Lungenfell, äussere Haut = Rippenfell. Dazwischen liegt der flüssigkeitsgefüllte Pleuraspalt mit Unterdruck.", bsp:"Dringt Luft ein, kollabiert die Lunge (Pneumothorax)."},
+    {tt:"Zwerchfell als Atemmuskel", kern:"Das Zwerchfell trennt Brust- vom Bauchraum und ist der wichtigste Atemmuskel; beim Einatmen zieht es sich zusammen.", bsp:"Ohne Zwerchfell keine Atmung, das zeigt die Eiserne Lunge bei Kinderlähmung."},
+    {tt:"Raucherlunge (COPD)", kern:"Hinter der Raucherlunge steckt die COPD mit Lungenemphysem und chronisch obstruktiver Bronchitis.", bsp:"Leitsymptome: Husten, Auswurf, Atemnot (Raucherhusten)."}
+  ],
+  fragen:[
+    {frage:"Wie sind die Bronchien aufgebaut?", muster:"Die Bronchien unterteilen sich in drei Abschnitte:<ul><li>Hauptbronchien</li><li>Bronchiolen</li><li>Alveolen</li></ul>", check:["Hauptbronchien","Bronchiolen","Alveolen"]},
+    {frage:"Was ist eine der wichtigsten Aufgaben der Schleimhaut in den Bronchien?", muster:"Die Schleimhaut umhüllt die über die Atemwege eingedrungenen Fremdsubstanzen mit Schleim. Anschliessend transportieren die Flimmerhärchen die eingeschlossenen Fremdkörper Richtung Luftröhre, so dass sie dort abgehustet werden können.", check:["Fremdkörper in Schleim einhüllen","Flimmerhärchen transportieren Richtung Luftröhre","Abhusten"]},
+    {frage:"Wo befinden sich das Brustfell, das Lungenfell und das Rippenfell?", muster:"Das Brustfell umhüllt die Lungenflügel und besteht aus zwei Häuten. Die innere Haut ist das Lungenfell, es ist mit den Lungenflügeln verwachsen. Die äussere Haut ist das Rippenfell, es kleidet die Brusthöhle aus und haftet an den Rippen und am Zwerchfell. Zwischen beiden Häuten liegt der Pleuraspalt.", check:["Brustfell umhüllt die Lungenflügel","Lungenfell = innen, verwachsen","Rippenfell = aussen, an Rippen und Zwerchfell"]},
+    {frage:"Wo befindet sich der Pleuraspalt und was ist seine Aufgabe?", muster:"Der Pleuraspalt befindet sich zwischen dem Lungenfell und dem Rippenfell. Er sorgt dafür, dass sich Lunge und Brustkorb gegeneinander verschieben können, ohne sich voneinander zu lösen.", check:["Zwischen Lungenfell und Rippenfell","Verschieben ermöglichen","Nicht voneinander lösen"]},
+    {frage:"Wo befindet sich das Zwerchfell und welche Rolle spielt es für die Atmung?", muster:"Das Zwerchfell trennt den Brustraum vom Bauchraum. Es ist ein lebensnotwendiger Atemmuskel. Ohne die Tätigkeit des Zwerchfells käme die Atmung zum Erliegen und die Sauerstoffversorgung des Körpers wäre nicht mehr möglich.", check:["Trennt Brust- vom Bauchraum","Wichtigster Atemmuskel","Ohne Zwerchfell keine Atmung"]},
+    {frage:"Was ist die Hauptaufgabe der Lunge?", muster:"Die Hauptaufgabe der Lunge ist die Atmung, also der Gasaustausch. Dabei wird Sauerstoff aus der eingeatmeten Luft aufgenommen und Kohlendioxid aus dem Blut ausgeatmet. Der eigentliche Gasaustausch findet in den Alveolen statt.", check:["Atmung / Gasaustausch","Sauerstoff auf, Kohlendioxid ab","Findet in den Alveolen statt"]},
+    {frage:"Wie wird das sauerstoffarme Blut aus dem Herzen wieder mit Sauerstoff versorgt?", muster:"Das sauerstoffarme Blut gelangt vom Herzen über die Lungenarterie in die Lunge. An den Alveolen wird Kohlendioxid abgegeben und Sauerstoff aufgenommen. Das angereicherte Blut fliesst über die Lungenvene zum Herzen zurück und wird in den Körper gepumpt.", check:["Über die Lungenarterie in die Lunge","An den Alveolen Austausch","Über die Lungenvene zurück zum Herzen"]},
+    {frage:"Welche beiden Krankheiten verbergen sich hinter dem Begriff Raucherlunge?", muster:"Das Lungenemphysem und die chronisch obstruktive Bronchitis.", check:["Lungenemphysem","Chronisch obstruktive Bronchitis"]},
+    {frage:"Wie lässt es sich erklären, dass Ex-Raucher auch noch viele Jahre nach dem Aufhören bedeutend häufiger an einer chronischen Bronchitis leiden als Nichtraucher?", muster:"Eine Raucherlunge wurde über viele Jahre mit Teer und anderen Giftstoffen belastet. Das schädigt neben dem Lungengewebe auch die Bronchialschleimhäute. Lunge und Bronchien können sich zwar bis zu einem gewissen Grad regenerieren, das dauert aber unter Umständen viele Jahre. Während der gesamten Regenerationsphase bleiben die Schleimhäute anfällig für Entzündungsprozesse.", check:["Jahrelange Belastung durch Teer und Giftstoffe","Schäden an den Bronchialschleimhäuten","Regeneration dauert Jahre, Schleimhäute bleiben anfällig"]},
+    {frage:"Was versteht man unter einer Bronchitis und worin besteht der Unterschied zu Asthma?", muster:"Eine Bronchitis ist eine Entzündung der Schleimhäute im Bereich der grösseren Bronchien. Bei einer Asthmaerkrankung dagegen können die gesamten Bronchialschleimhäute bis hin zu den kleinsten Bronchiolen entzündet sein.", check:["Bronchitis: grössere Bronchien","Asthma: bis in die kleinsten Bronchiolen","Unterschied in der Ausdehnung der Entzündung"]},
+    {frage:"Wie wirkt Cortison bei einer Asthmaerkrankung?", muster:"Cortison unterdrückt die Entzündungsprozesse. Dadurch werden die Schwellung der Schleimhäute in den Atemwegen und die dortige Schleimproduktion reduziert. Infolgedessen wird die Verengung der Bronchien aufgehoben.", check:["Unterdrückt die Entzündung","Reduziert Schwellung und Schleimbildung","Hebt die Verengung der Bronchien auf"]},
+    {frage:"Nennen Sie 4 ganzheitliche Massnahmen bei einer bestehenden Asthmaerkrankung und erklären Sie diese.", muster:"Vier ganzheitliche Massnahmen:<ul><li>Darmreinigung: Sie entlastet das Immunsystem, so dass es sich wieder intensiv mit dem Entzündungsgeschehen befassen kann.</li><li>Sämtliche Milchprodukte meiden: Bei manchen Menschen fördert Milchkonsum Entzündungsprozesse und verstärkt Asthmasymptome.</li><li>Spezielle Atemtechniken erlernen: Eine zu tiefe oder zu schnelle Atmung (Hyperventilation) muss verhindert werden, damit der Kohlendioxidgehalt nicht unter einen bestimmten Wert fällt.</li><li>Ausschliesslich biologische Haushaltsreiniger verwenden: Herkömmliche Reiniger enthalten synthetische, teils toxische Substanzen, die sich beim Gebrauch verflüchtigen und über die Lunge eingeatmet werden.</li></ul>", check:["Darmreinigung entlastet das Immunsystem","Milchprodukte meiden","Atemtechniken gegen Hyperventilation","Biologische Haushaltsreiniger statt toxischer"]}
+  ]
+},
+  {
+  id:"m1u4", nr:4, titel:"Die Leber",
+  unter:"Aufbau, Aufgaben, Entgiftung, Erkrankungen",
+  videos: MODUL1_VIDEOS,
+  lessons:[
+    {titel:"Lage und Aufbau der Leber", html:`
+      <p>Die Leber liegt im <b>rechten Oberbauch</b> direkt unter dem Zwerchfell, mit dem sie teilweise verwachsen ist. Sie ist mit durchschnittlich etwa <b>1,5 kg</b> eines der schwersten Organe und besteht aus einem grossen rechten und einem kleineren linken Leberlappen. An ihrer Unterseite sitzt die Gallenblase.</p>
+      <p>Das schwammartige, sehr gut durchblutete Gewebe besteht aus rund 300 Milliarden Zellen, die sich zu unzähligen sechseckigen <b>Leberläppchen</b> (1 bis 2 Millimeter Durchmesser) ordnen. Darin arbeiten vor allem zwei Zellarten:</p>
+      <ul>
+        <li><b>Hepatozyten</b> (Leberzellen): bilden den Hauptteil des Gewebes und leisten die eigentliche Stoffwechselarbeit.</li>
+        <li><b>Kupffer-Zellen</b>: die „Fresszellen" der Leber, die das durchfliessende Blut reinigen und überalterte Blutkörperchen abbauen.</li>
+      </ul>
+      <p>Durch das Gewebe verlaufen die <b>Sinusoide</b>, Blutkapillaren, in denen sich das Blut der Pfortader mit dem der Leberarterie mischt.</p>
+      <div class="merk"><b>Merke:</b> Die Leber besitzt eine aussergewöhnliche Regenerationsfähigkeit und kann selbst nach Entfernung der Hälfte wieder nachwachsen.</div>`},
+    {titel:"Die Leberpforte und die Gefässe", html:`
+      <p>An der Unterseite der Leber liegt die <b>Leberpforte</b>, eine Art Hauptverkehrsknotenpunkt, wo Gefässe in die Leber hinein- und wieder herausführen.</p>
+      <ul>
+        <li><b>Hinein:</b> die <b>Pfortader</b> (bringt sauerstoffarmes, aber nährstoffreiches Blut aus dem Dünndarm) und die <b>Leberarterie</b> (bringt sauerstoffreiches Blut aus der Hauptschlagader).</li>
+        <li><b>Heraus:</b> der <b>Lebergallengang</b> (leitet die Galle zum Zwölffingerdarm) und die <b>Lymphgefässe</b>.</li>
+      </ul>
+      <p>Über die Pfortader gelangen die Nährstoffe aus der Verdauung zur Leber, aber auch belastende Stoffe wie Alkohol oder Medikamente. Nach der Verarbeitung verlässt das Blut die Leber über die Lebervenen in die untere Hohlvene Richtung Herz.</p>`},
+    {titel:"Die Aufgaben der Leber", html:`
+      <p>Die Leber spielt die zentrale Rolle beim <b>Auf-, Ab- und Umbau</b> der zugeführten Nährstoffe und bei der Entgiftung.</p>
+      <ul>
+        <li><b>Kohlenhydrate:</b> Überschüssige Glucose wird in die Speicherform <b>Glykogen</b> umgewandelt und in den Hepatozyten gespeichert. Bei Bedarf stellt die Leber aus Glykogen, Aminosäuren oder Glycerin auch neu Glucose her.</li>
+        <li><b>Fette:</b> Aus Fettbausteinen bildet die Leber körpereigene Stoffe wie Cholesterin (für die Galle) oder Hormonvorstufen.</li>
+        <li><b>Proteine:</b> Aus Aminosäuren baut sie körpereigene Proteine (z. B. Gerinnungs- und Trägerproteine); giftiges Ammoniak wandelt sie in ungiftigen Harnstoff um.</li>
+        <li><b>Galle:</b> Sie produziert die Gallenflüssigkeit, die im Darm das Fett emulgiert.</li>
+        <li><b>Speicher:</b> fettlösliche Vitamine, Folat, Vitamin B12 sowie Spurenelemente wie Eisen und Kupfer.</li>
+        <li><b>Entgiftung:</b> Gifte wie Alkohol werden so umgebaut, dass sie über die Nieren ausgeschieden werden können.</li>
+      </ul>`},
+    {titel:"Was die Leber belastet", html:`
+      <p>Die Leber wird nicht von schmerzleitenden Nerven durchzogen, darum <b>schmerzt sie nicht</b>, wenn es ihr schlecht geht. Sie meldet sich erst spät, etwa durch Druckgefühl im rechten Oberbauch.</p>
+      <p>Vor allem <b>Masslosigkeit</b> setzt ihr zu: zu viel, zu süss, zu fett, zu viel Alkohol, Drogen und Medikamente, chemische Körperpflege, Stress und Bewegungsmangel. <b>Alkohol</b> ist einer der grössten Feinde der Leber, seine Abbauprodukte sind starke Gifte. Auch Medikamente (z. B. Paracetamol, Ibuprofen) belasten die Leber; unsachgemässe Dosierung kann bis zum akuten Leberversagen führen.</p>
+      <p>Kann die Leber die Schadstoffe nicht mehr bewältigen, gelangen diese ins Blut und verursachen Symptome wie Energiemangel, Müdigkeit, Schwindel, Kopfschmerzen, Konzentrations- und Schlafstörungen sowie Verdauungsprobleme.</p>
+      <div class="merk"><b>Merke:</b> Im Volksmund heisst es: Die Müdigkeit ist der Schmerz der Leber.</div>`},
+    {titel:"Die wichtigsten Lebererkrankungen", html:`
+      <p><b>Fettleber:</b> die häufigste Lebererkrankung. Bei ständigem Energieüberschuss wird Fett in die Leberzellen eingelagert; ab über 5 Prozent verfetteter Zellen spricht man von einer Fettleber. Ursachen sind Ernährungsfehler, Alkohol, das Eigenbrauer-Syndrom und Typ-2-Diabetes. Sie ist in der Regel <b>reversibel</b>.</p>
+      <p><b>Hepatitis</b> ist die Entzündung der Leber, akut (unter sechs Monaten) oder chronisch (über sechs Monaten). Auslöser sind Viren (A, B, C), Medikamenten- oder Alkoholmissbrauch, Giftstoffe oder Infektionen. Ein typisches Zeichen ist die Gelbsucht (Ikterus).</p>
+      <p><b>Leberzirrhose:</b> eine chronische Erkrankung, bei der immer mehr Leberzellen absterben und durch festes, knotiges Bindegewebe ersetzt werden. Die Leber verhärtet und schrumpft, das Blut staut sich (Pfortaderhochdruck). Aus einer Zirrhose kann Leberkrebs entstehen.</p>`},
+    {titel:"Ganzheitliche Unterstützung der Leber", html:`
+      <p>Die Leber lässt sich mit ganzheitlichen Massnahmen entlasten und in ihrer Regeneration unterstützen:</p>
+      <ul>
+        <li>Auf Alkohol und Rauchen verzichten, Medikamente nicht missbrauchen.</li>
+        <li>Frisch und vollwertig essen, isolierte Kohlenhydrate (Zucker, Weissmehl) minimieren, auf Menge und Qualität der Fette achten, Fertigprodukte meiden.</li>
+        <li><b>Bitterstoffe</b> zuführen, sie unterstützen die Verdauung und entlasten die Leber.</li>
+        <li>Leberfreundliche Kräuter und Gewürze nutzen: Kurkuma, Ingwer, Knoblauch, Koriander, Oregano, Rosmarin, Thymian.</li>
+        <li>Heilpflanzen wie Mariendistel, Desmodium, Löwenzahn oder Artischocke einsetzen.</li>
+        <li>Reichlich Wasser trinken, sich regelmässig bewegen, Stress reduzieren und die Darmgesundheit fördern.</li>
+      </ul>`}
+  ],
+  karten:[
+    {tt:"Aufbau der Leber", kern:"Rund 1,5 kg schwer, rechter und kleinerer linker Leberlappen, Gewebe aus sechseckigen Leberläppchen.", bsp:"Ein Leberläppchen misst nur 1 bis 2 Millimeter, ähnlich einer Bienenwabe."},
+    {tt:"Hepatozyten und Kupffer-Zellen", kern:"Hepatozyten leisten die Stoffwechselarbeit, Kupffer-Zellen reinigen als Fresszellen das Blut.", bsp:"Kupffer-Zellen bauen überalterte rote Blutkörperchen ab und speichern das anfallende Eisen."},
+    {tt:"Leberpforte", kern:"Knotenpunkt an der Unterseite: Pfortader und Leberarterie hinein, Lebergallengang und Lymphgefässe heraus.", bsp:"Die Pfortader bringt nährstoffreiches Blut aus dem Dünndarm zur Verarbeitung."},
+    {tt:"Glykogen als Speicher", kern:"Überschüssige Glucose wird als Glykogen in den Hepatozyten gespeichert und bei Bedarf wieder freigesetzt.", bsp:"Nach etwa 24 Stunden Fasten ist der Glykogenspeicher leer, die Leber bildet dann Glucose neu."},
+    {tt:"Entgiftung", kern:"Gifte werden in Kupffer-Zellen und Hepatozyten so umgebaut, dass sie über die Nieren ausgeschieden werden.", bsp:"Giftiges Ammoniak wird in gut wasserlöslichen Harnstoff umgewandelt."},
+    {tt:"Fettleber", kern:"Häufigste Lebererkrankung, ab über 5 Prozent verfetteter Leberzellen, meist reversibel.", bsp:"Alkoholkarenz, Gewichtsabnahme und gesunde Ernährung können sie wieder rückgängig machen."}
+  ],
+  fragen:[
+    {frage:"Beschreiben Sie grob, wie die Leber aufgebaut ist.", muster:"Die Leber wiegt durchschnittlich etwa 1,5 kg und ist eines der schwersten Organe. Sie besteht aus einem grossen rechten und einem kleineren linken Leberlappen. Ihr schwammiges Gewebe setzt sich aus vielen winzigen, etwa 1 bis 2 Millimeter grossen Leberläppchen zusammen.", check:["Etwa 1,5 kg schwer","Rechter und kleinerer linker Leberlappen","Gewebe aus winzigen Leberläppchen"]},
+    {frage:"Aus welchen Zellarten besteht die Leber hauptsächlich?", muster:"Die Leber besteht aus verschiedenen Zellarten, hauptsächlich aus Hepatozyten (Leberzellen) sowie Kupffer-Zellen.", check:["Hepatozyten (Leberzellen)","Kupffer-Zellen"]},
+    {frage:"Welche wichtige Arbeit wird von den Kupffer-Zellen erledigt?", muster:"Die Kupffer-Zellen reinigen das Blut, indem sie körperfremde Dinge wie schädliche Bakterien oder Schadstoffe entfernen. Ebenso bauen sie unbrauchbare rote Blutkörperchen ab.", check:["Reinigen das Blut von Körperfremdem","Bauen unbrauchbare rote Blutkörperchen ab"]},
+    {frage:"Was verbirgt sich hinter der »Leberpforte«?", muster:"Die Leberpforte liegt an der Unterseite der Leber. Sie beschreibt genau die Stelle, wo die Pfortader und die Leberarterie in die Leber eintreten und der Lebergallengang und die Lymphgefässe aus der Leber heraus führen.", check:["Stelle an der Unterseite der Leber","Eintritt von Pfortader und Leberarterie","Austritt von Lebergallengang und Lymphgefässen"]},
+    {frage:"Nennen Sie die Aufgaben der Leber und beschreiben Sie sie mit eigenen Worten.", muster:"Die Leber spielt eine zentrale Rolle beim Auf-, Ab- und Umbau von Nährstoffen und bei der Entgiftung. Im Einzelnen:<ul><li>Verarbeitung von Kohlenhydraten und Speicherung von Glykogen</li><li>Verarbeitung von Fetten und Proteinen</li><li>Bildung der Gallenflüssigkeit für die Fettverdauung</li><li>Speicherung von Spurenelementen und Vitaminen</li><li>Abbau schädlicher Stoffwechselendprodukte und Toxine wie Alkohol</li><li>Bildung von Hormonen bzw. deren Vorstufen</li><li>Auf- und Abbau von Cholesterin</li></ul>", check:["Auf-, Ab- und Umbau von Nährstoffen","Entgiftung und Abbau von Toxinen","Bildung der Galle","Speicherung von Vitaminen und Spurenelementen"]},
+    {frage:"Muss Glucose in jedem Fall mit der Nahrung aufgenommen werden oder kann die Leber sie auch selbst herstellen?", muster:"Glucose muss nicht zwingend mit der Nahrung aufgenommen werden, weil die Leber aus Glykogen (der Speicherform der Glucose), aus Aminosäuren (aus Proteinen) oder aus Glycerin (aus Fetten) Glucose herstellen kann.", check:["Nahrungsaufnahme nicht zwingend","Herstellung aus Glykogen, Aminosäuren oder Glycerin"]},
+    {frage:"Welche Spurenelemente (zwei Beispiele) werden in der Leber gespeichert?", muster:"Die Leber speichert zum Beispiel Eisen und Kupfer.", check:["Eisen","Kupfer"]},
+    {frage:"Nennen Sie zwei Vitamine, die in der Leber bis zu ihrer Verwendung gelagert werden.", muster:"Die Leber speichert unter anderem die Vitamine A und B12.", check:["Vitamin A","Vitamin B12"]},
+    {frage:"Welche Faktoren belasten die Leber?", muster:"Zu den Faktoren, die die Leber belasten, zählen:<ul><li>Alkohol</li><li>Medikamente</li><li>Umweltgifte</li><li>sehr fettreiche Nahrung</li><li>das Eigenbrauer-Syndrom</li><li>Viren, die Hepatitis erzeugen</li><li>Flüssigkeitsmangel</li><li>Überforderung</li><li>Stress</li><li>Wut und Ärger (insbesondere unterdrückter Ärger)</li></ul>", check:["Alkohol, Medikamente, Umweltgifte","Sehr fettreiche Nahrung und Flüssigkeitsmangel","Hepatitis-Viren und Eigenbrauer-Syndrom","Stress, Wut und Ärger"]},
+    {frage:"Welche Beschwerden sind denkbar, wenn die Leber durch ein Übermass an Giften belastet ist?", muster:"Wenn zu viele Schadstoffe auf einmal anfallen, kann die Leber sie nicht vollständig abbauen und ein Teil gelangt ins Blut. Mögliche Symptome:<ul><li>allgemeiner Energiemangel</li><li>Müdigkeit</li><li>Schwindel</li><li>Kopfschmerzen</li><li>Konzentrations- und Schlafstörungen</li><li>Verdauungsprobleme wie Blähungen oder Durchfall</li><li>Gelenkprobleme</li></ul>", check:["Schadstoffe gelangen ins Blut","Energiemangel, Müdigkeit, Schwindel, Kopfschmerzen","Konzentrations- und Schlafstörungen","Verdauungs- und Gelenkprobleme"]},
+    {frage:"Klaus Meyer trinkt täglich viel Alkohol und hat eine Fettleber. Mit welchen Folgen muss er rechnen und wie kann er seine Leber unterstützen?", muster:"Behält Herr Meyer seinen Alkoholkonsum bei, kann sich die Leber nicht regenerieren und ihr Zustand verschlechtert sich weiter; mögliche Folgen sind eine Fettleberhepatitis und später eine alkoholbedingte Leberzirrhose bis hin zum Funktionsverlust und Tod. Da die Leber jedoch stark regenerationsfähig ist, kann er sie unterstützen, indem er:<ul><li>keinen Alkohol trinkt</li><li>nicht raucht</li><li>Koffein und unnötige Medikamente meidet</li><li>sich zucker- und fettarm mit hochwertigen Fetten ernährt</li><li>Fertigprodukte und Fast Food weglässt</li><li>Bitterstoffe sowie leberfreundliche Kräuter und Präparate (z. B. Mariendistel) nutzt</li><li>ausreichend Wasser trinkt</li><li>sich bewegt</li><li>Stress reduziert</li></ul>", check:["Ohne Änderung: Hepatitis, Zirrhose bis Funktionsverlust","Leber ist stark regenerationsfähig","Alkohol-, Nikotin- und Medikamentenverzicht","Gesunde Ernährung, Bitterstoffe, Wasser, Bewegung"]},
+    {frage:"Warum sollte ein an Hepatitis erkrankter Mensch bis zur vollständigen Ausheilung keinen Alkohol trinken?", muster:"Eine Hepatitis ist eine Leberentzündung, bei der Leberzellen absterben und die Funktion des Organs stark eingeschränkt ist, auch die Entgiftungsfähigkeit. Darum sollte die Leber nicht zusätzlich mit den giftigen Abbauprodukten des Alkohols belastet werden. Ziel ist es, sie weitestgehend zu entlasten, damit sie sich regenerieren kann.", check:["Leberzellen sterben ab, Funktion eingeschränkt","Entgiftungsfähigkeit betroffen","Alkohol wäre zusätzliche Giftbelastung","Entlastung ermöglicht Regeneration"]},
+    {frage:"Warum kann eine von einer Zirrhose befallene Leber ihre Aufgaben nur noch ungenügend wahrnehmen?", muster:"Bei einer Leberzirrhose sterben vermehrt Leberzellen ab und hinterlassen festes, knotiges Bindegewebe. Die Leber verhärtet und schrumpft. Die Verhärtung verhindert eine angemessene Durchblutung, so dass Nährstoffe und Schadstoffe die Leberzellen immer schlechter erreichen. Das beeinträchtigt die Entgiftung, die Speicherung von Glucose, Mineralien und Vitaminen sowie die Verarbeitung von Fetten und Proteinen. Zudem wird die Leber selbst schlechter mit Nährstoffen und Sauerstoff versorgt, was ihre Regeneration behindert.", check:["Zellabbau und knotiges Bindegewebe, Verhärtung","Gestörte Durchblutung des Gewebes","Entgiftung, Speicherung und Verarbeitung beeinträchtigt","Schlechte Eigenversorgung behindert Regeneration"]}
+  ]
+},
+  {
+  id:"m1u5", nr:5, titel:"Die Gallenblase",
+  unter:"Gallenflüssigkeit, Fettverdauung, Gallensteine",
+  videos: MODUL1_VIDEOS,
+  lessons:[
+    {titel:"Aufgabe der Gallenblase", html:`<p>Die Gallenblase liegt an der <b>Unterseite der Leber</b> und ist über die Gallengänge sowohl mit der Leber als auch mit dem <b>Zwölffingerdarm</b> verbunden. Sie sieht aus wie eine kleine Birne, ist etwa 8 cm lang und kann bis zu 60 Milliliter Gallenflüssigkeit speichern.</p><p>Ihre Hauptaufgaben sind das <b>Einlagern</b> der in der Leber produzierten Gallenflüssigkeit und deren <b>Abgabe an den Zwölffingerdarm</b>. Die Leber bildet täglich einen halben bis einen ganzen Liter Galle. Ein Teil fliesst direkt bei Bedarf ab, der Rest wird in der Gallenblase gespeichert und durch Wasserentzug auf ein Zehntel des Volumens eingedickt.</p><div class="merk"><b>Merke:</b> Je fetthaltiger die Mahlzeit, desto mehr Gallenflüssigkeit gibt die Gallenblase in den Zwölffingerdarm ab.</div>`},
+    {titel:"Gallenflüssigkeit und Fettverdauung", html:`<p>Die Gallenflüssigkeit besteht vor allem aus Wasser, <b>Gallensalzen</b>, Bilirubin, Cholesterin und Lecithin. Sie erfüllt drei zentrale Aufgaben:</p><p><b>1. Fettverdauung:</b> Die Gallensalze <b>emulgieren</b> die Nahrungsfette, spalten sie also in kleine Tröpfchen, damit die fettspaltenden Enzyme sie verarbeiten können.</p><p><b>2. Neutralisierung:</b> Der saure Nahrungsbrei aus dem Magen muss im Dünndarm neutralisiert werden, denn die Verdauungsenzyme brauchen ein basisches Milieu. Das erledigt die Galle gemeinsam mit den basischen Säften der Bauchspeicheldrüse.</p><p><b>3. Entgiftung:</b> Über die Galle scheidet die Leber überschüssiges Cholesterin, Bilirubin sowie Medikamente und Gifte aus.</p><div class="merk"><b>Merke:</b> Der gelbe Gallenfarbstoff Bilirubin entsteht beim Abbau alter roter Blutkörperchen. Gelangt zu viel davon ins Blut, entsteht die Gelbsucht (ein Symptom, keine eigene Krankheit).</div>`},
+    {titel:"Die Gallenwege und das Recycling", html:`<p>Die Galle wird in den Leberzellen gebildet und verlässt die Leber über den rechten und linken Lebergallengang. Diese münden in den <b>gemeinsamen Lebergallengang</b>. Von ihm zweigt der Gallenblasengang zur Gallenblase ab. Danach heisst der Gang <b>grosser Gallengang</b>. Er führt in die Bauchspeicheldrüse, vereint sich dort mit dem Pankreasgang und mündet schliesslich im Zwölffingerdarm.</p><p>Nach der Fettverdauung werden die Gallensalze nicht einfach ausgeschieden: Der grösste Teil wird im unteren Dünndarm ins Blut aufgenommen und über die Pfortader <b>zurück zur Leber</b> transportiert. Dort werden sie wiederverwertet (recycelt).</p><div class="merk"><b>Merke:</b> Dieser Kreislauf der Gallensalze zwischen Darm und Leber heisst enterohepatischer Kreislauf. Er zeigt, wie wertvoll die Gallensalze für den Körper sind.</div>`},
+    {titel:"Gallensteine und Vorbeugung", html:`<p>Die Gallenblase kann grosse Steine (bis Walnussgrösse) oder feinen Gallengriess enthalten. Man unterscheidet Cholesterinsteine, Mischsteine und Pigmentsteine. Ursache ist eine ungünstige Zusammensetzung und zu hohe Konzentration der Galle.</p><p>Die <b>6-F-Regel</b> nennt die wichtigsten Risikofaktoren: fat (übergewichtig), female (weiblich), fertile (schwanger bzw. Kinder geboren), forty (über 40), fair (hellhäutig) und familiär (genetische Veranlagung). Weitere Faktoren sind schlechte Ernährung, Bewegungsmangel, synthetische Hormone und Magnesiummangel.</p><p><b>Ganzheitliche Vorbeugung:</b> basenüberschüssige Ernährung mit wenig Zucker und Alkohol, hochwertige Fette, Leberentlastung mit Bitterstoffen, Bewegung, Magnesium, Übergewicht abbauen, gallenanregende Kräutertees (Pfefferminze, Schafgarbe, Löwenzahn) und Kurkuma sowie ein guter Umgang mit Ärger und Wut.</p><div class="merk"><b>Merke:</b> Blockiert ein Stein den Abfluss, kommt es zur schmerzhaften Gallenkolik. Mögliche Folgen sind Gelbsucht und Entzündungen von Gallenblase, Gallengängen oder Bauchspeicheldrüse.</div>`},
+    {titel:"Leben ohne Gallenblase", html:`<p>Verursachen Gallensteine dauerhaft Beschwerden, wird oft die gesamte Gallenblase operativ entfernt. Die Beschwerden verschwinden zunächst, doch ohne Umstellung von Ernährung und Lebensweise ist die <b>Ursache nicht behoben</b>.</p><p>Ohne den Vorratsbehälter kann die abgegebene Gallenmenge nicht mehr dem Bedarf angepasst werden. Es steht dann zu wenig oder zu viel Galle bereit, was die Fettverdauung stört. Mögliche Probleme sind Gewichtszunahme, Durchfälle, Verstopfung oder Blähungen. Auch die ursprünglichen Schmerzen können bleiben, etwa wenn Steine im Gallengang übersehen wurden.</p><div class="merk"><b>Merke:</b> Aus ganzheitlicher Sicht lässt sich kein Organ ohne Folgen entfernen. Da der Körper auf eine gute Fettverdauung angewiesen ist, sollte eine Entfernung der Gallenblase sehr gut überlegt sein.</div>`}
+  ],
+  karten:[
+    {tt:"Aufgabe der Gallenblase", kern:"Speichert die in der Leber gebildete Gallenflüssigkeit und gibt sie bei Bedarf an den Zwölffingerdarm ab.", bsp:"Nach einer fettreichen Mahlzeit wird besonders viel Galle abgegeben."},
+    {tt:"Fettverdauung", kern:"Die Gallensalze emulgieren die Nahrungsfette, spalten sie also in kleine Tröpfchen für die fettspaltenden Enzyme.", bsp:"Wie ein Spülmittel, das Fett im Wasser in feine Tröpfchen auflöst."},
+    {tt:"Neutralisierung", kern:"Die Galle neutralisiert gemeinsam mit den Bauchspeicheldrüsensäften den sauren Nahrungsbrei aus dem Magen.", bsp:"Die Verdauungsenzyme im Dünndarm arbeiten nur im basischen Milieu."},
+    {tt:"Gallensalz-Recycling", kern:"Die Gallensalze werden im unteren Dünndarm ins Blut aufgenommen und über die Pfortader zurück zur Leber transportiert und wiederverwertet.", bsp:"Enterohepatischer Kreislauf zwischen Darm und Leber."},
+    {tt:"6-F-Regel", kern:"Risikofaktoren für Gallensteine: fat, female, fertile, forty, fair, familiär.", bsp:"Übergewichtige, hellhäutige Frauen über 40 mit mehreren Kindern sind besonders anfällig."}
+  ],
+  fragen:[
+    {frage:"Welche Funktion hat die Gallenblase?", muster:"Die Gallenblase speichert die in der Leber produzierte Gallenflüssigkeit und gibt sie bei Bedarf an den Zwölffingerdarm ab. Je fetthaltiger eine Mahlzeit ist, desto mehr Gallenflüssigkeit gibt die Gallenblase ab.", check:["Speichert die in der Leber gebildete Galle","Gibt sie bei Bedarf an den Zwölffingerdarm ab","Mehr Abgabe bei fetthaltigen Mahlzeiten"]},
+    {frage:"Was macht die Gallenflüssigkeit so unerlässlich für den Verdauungsprozess?", muster:"Die Gallenflüssigkeit erfüllt drei Aufgaben:<ul><li>Sie emulgiert die über die Nahrung zugeführten Fette, so dass diese erst richtig verdaut werden können.</li><li>Sie neutralisiert den sauren Nahrungsbrei, wenn dieser aus dem Magen in den Dünndarm gelangt.</li><li>Sie leitet überschüssiges Cholesterin, Bilirubin und Schadstoffe aus.</li></ul>", check:["Emulgiert die Nahrungsfette","Neutralisiert den sauren Nahrungsbrei","Leitet Cholesterin, Bilirubin und Schadstoffe aus"]},
+    {frage:"Welche Route nimmt die Gallenflüssigkeit durch den Körper?", muster:"Aus der Leber oder der Gallenblase gelangt die Galle über die Gallenwege in den Dünndarm. Dort emulgieren die Gallensalze die Nahrungsfette. Ein Teil der Galle gelangt in den Dickdarm und wird mit dem Stuhl ausgeschieden. Die Gallensalze dagegen werden im unteren Dünndarm in die Pfortader aufgenommen und mit dem Pfortaderblut zurück in die Leber transportiert, dort recycelt und nach einer fetthaltigen Mahlzeit erneut abgegeben.", check:["Von Leber/Gallenblase über die Gallenwege in den Dünndarm","Emulgieren der Fette im Dünndarm","Gallensalze über die Pfortader zurück zur Leber","Recycling und erneute Abgabe"]},
+    {frage:"Wodurch wird die Wichtigkeit der Gallensalze besonders deutlich?", muster:"Der weitaus grösste Teil der Gallensalze wird nach Beendigung des Verdauungsvorgangs nicht mit der Gallenflüssigkeit ausgeschieden, sondern zurück zur Leber transportiert und wiederverwertet.", check:["Grösster Teil wird nicht ausgeschieden","Rücktransport zur Leber","Wiederverwertung (Recycling)"]},
+    {frage:"Welche Massnahmen würden Sie ergreifen, um einer Gallensteinbildung entgegen zu wirken?", muster:"Zum Beispiel:<ul><li>hochwertige Fette verwenden</li><li>wenig Zucker und tierisches Protein essen</li><li>Alkohol und andere Genussmittel nur selten konsumieren</li><li>auf synthetische Hormone verzichten</li><li>hin und wieder gallenanregende Tees trinken</li><li>Kurkuma in den Speiseplan integrieren</li><li>einen positiven Umgang mit den eigenen Emotionen (besonders Wut und Ärger) entwickeln</li></ul>", check:["Hochwertige Fette, wenig Zucker und tierisches Protein","Alkohol und synthetische Hormone meiden","Gallenanregende Tees und Kurkuma","Positiver Umgang mit Wut und Ärger"]},
+    {frage:"Hätten Sie persönlich Bedenken, Ihre Gallenblase entfernen zu lassen? Wenn ja, welche?", muster:"Aus ganzheitlicher Sicht kann kein Organ ohne Auswirkung auf die Gesundheit entfernt werden. Fehlt die Gallenblase als Vorratsbehälter, kann die abgegebene Gallenmenge nicht mehr dem aktuellen Bedarf angepasst werden. Es steht dann zu wenig oder zu viel Galle bereit, was die Fettverdauung stört. Da der Körper auf eine funktionierende Verdauung und ausreichend hochwertige Fette angewiesen ist, sollte eine Entfernung sehr gut überlegt sein.", check:["Kein Organ ist ohne Folgen entfernbar","Gallenmenge nicht mehr bedarfsgerecht anpassbar","Gestörte Fettverdauung als Folge","Entfernung gut überlegen"]}
+  ]
+},
+  {
+  id:"m1u6", nr:6, titel:"Die Bauchspeicheldrüse",
+  unter:"Enzyme, Insulin, Blutzucker, Diabetes",
+  videos: MODUL1_VIDEOS,
+  lessons:[
+    {titel:"Doppelfunktion: Verdauungsdrüse und Hormondrüse", html:`<p>Die Bauchspeicheldrüse (<b>Pankreas</b>) liegt quer im Oberbauch, ist rund 15 bis 20 cm lang und reicht vom Zwölffingerdarm bis zur Milz. Sie ist die <b>wichtigste Verdauungsdrüse</b> des Körpers und hat gleich zwei Aufgaben.</p><p>Als <b>exokrine Drüse</b> gibt sie über den Pankreasgang bis zu zwei Liter Verdauungssaft pro Tag in den Zwölffingerdarm ab. Als <b>endokrine Drüse</b> gibt sie die Hormone Insulin und Glucagon direkt ins Blut ab. Der endokrine Teil sind die winzigen <b>Langerhans-Inseln</b>, die wie Inseln im exokrinen Gewebe verstreut liegen.</p><div class="merk"><b>Merke:</b> Die Bauchspeicheldrüse ist beides zugleich - endokrin (Hormone ins Blut) und exokrin (Verdauungssaft in den Darm).</div>`},
+    {titel:"Die Verdauungsenzyme", html:`<p>Nahrung muss in kleinste Bausteine zerlegt werden, damit der Körper sie nutzen kann: Kohlenhydrate in Einfachzucker (z. B. Glucose), Proteine in Aminosäuren, Fette in Fettsäuren. Dafür bildet die Bauchspeicheldrüse über 30 verschiedene Enzyme in drei Gruppen.</p><p><b>Amylasen</b> spalten Kohlenhydrate, <b>Lipasen</b> spalten Fette, <b>Proteasen</b> spalten Proteine. Die Proteasen werden erst im Zwölffingerdarm aktiviert - sonst würde sich die Bauchspeicheldrüse selbst verdauen.</p><div class="merk"><b>Merke:</b> Amylasen (Kohlenhydrate), Lipasen (Fette), Proteasen (Proteine) - erst als kleinste Bausteine gelangt die Nahrung ins Blut.</div>`},
+    {titel:"Blutzucker-Regulation: Insulin und Glucagon", html:`<p>Nach dem Essen gelangt Glucose ins Blut und lässt den Blutzuckerspiegel steigen. Damit der Zucker in die Zellen kommt, schickt die Bauchspeicheldrüse <b>Insulin</b> ins Blut. Insulin bindet an Rezeptoren und öffnet die „Zellentürchen“ - es ist der Schlüssel, der <b>Türöffner</b> für die Glucose. So sinkt der Blutzucker wieder.</p><p>Überschüssige Glucose speichert die Leber als <b>Glykogen</b>. Fällt der Blutzucker unter den Basiswert, gibt die Bauchspeicheldrüse <b>Glucagon</b> ab. Die Leber versteht dies als Notruf und wandelt Glykogen wieder in Glucose um.</p><div class="merk"><b>Merke:</b> Insulin senkt den Blutzucker (Zucker in die Zellen), Glucagon hebt ihn (Glykogen wird zu Glucose). Insulin hemmt zudem den Fettabbau, Glucagon fördert ihn.</div>`},
+    {titel:"Diabetes Typ 1 und Typ 2", html:`<p><b>Typ-1-Diabetes</b> ist ein Insulinmangel: Das eigene Immunsystem zerstört die insulinbildenden Beta-Zellen der Langerhans-Inseln (Autoimmungeschehen bei genetischer Veranlagung, oft ausgelöst durch Virusinfekte oder frühe Milch-/Glutenernährung). Betroffene sind meist lebenslang auf Insulin angewiesen.</p><p><b>Typ-2-Diabetes</b> ist der frühere Altersdiabetes. Die Bauchspeicheldrüse produziert genug Insulin, aber die Zellen sind <b>insulinresistent</b> und nehmen zu wenig Glucose auf. Er entwickelt sich langsam über Jahre durch ungesunde Ernährung, Bewegungsmangel und Übergewicht.</p><div class="merk"><b>Merke:</b> Typ 1 = zu wenig Insulin (Beta-Zellen zerstört). Typ 2 = genug Insulin, aber die Zellen reagieren nicht mehr darauf (Insulinresistenz).</div>`},
+    {titel:"Bauchspeicheldrüse entlasten und Diabetes vorbeugen", html:`<p>Eine geschwächte Bauchspeicheldrüse macht sich vor allem nach fettreichen Speisen bemerkbar: Völlegefühl, Blähungen, Durchfall. Entlastend wirken eine leicht verdauliche, überwiegend vegetarische Kost, weniger tierische Fette, das Meiden von raffinierten Kohlenhydraten und Alkohol sowie mehrere kleine statt weniger grosser Mahlzeiten.</p><p>Bei starker Fettunverträglichkeit hilft MCT-Öl (braucht keine Lipasen). Früchte wie Ananas, Papaya und Kiwi liefern proteinspaltende Enzyme. Gegen Typ-2-Diabetes helfen Industriezucker meiden, Übergewicht abbauen, regelmässige Bewegung, ausreichend Magnesium und Omega-3-Fette.</p><div class="merk"><b>Merke:</b> Leicht verdaulich, fettarm, zuckerarm und Bewegung entlasten die Bauchspeicheldrüse und beugen Typ-2-Diabetes vor.</div>`},
+    {titel:"Warum zu viel Zucker dick macht", html:`<p>Die Leber kann Glucose nur begrenzt als Glykogen speichern - die Vorräte sind schon nach etwa 24 Stunden Fasten aufgebraucht. Ist der Glykogenspeicher voll und kommt weiter Zucker, greift <b>Plan B</b>: Der Überschuss wird in Fett umgewandelt und ins Fettgewebe eingelagert.</p><p>Dauerhaft zu viele Kohlenhydrate - besonders mit Bewegungsmangel - führen so zu Übergewicht. Nach jeder Mahlzeit steigt zudem der Insulinspiegel, und Insulin hemmt den Fettabbau. Häufige kleine Mahlzeiten geben dem Körper daher kaum Gelegenheit, Fett abzubauen.</p><div class="merk"><b>Merke:</b> Ist der Glykogenspeicher der Leber voll, wandert überschüssiger Zucker als Fett ins Fettgewebe - Zucker macht dick.</div>`}
+  ],
+  karten:[
+    {tt:"Endokrin und exokrin", kern:"Die Bauchspeicheldrüse gibt Hormone direkt ins Blut ab (endokrin) und Verdauungssaft in den Darm (exokrin).", bsp:"Insulin geht ins Blut, Amylase geht in den Zwölffingerdarm."},
+    {tt:"Die drei Enzymgruppen", kern:"Amylasen spalten Kohlenhydrate, Lipasen spalten Fette, Proteasen spalten Proteine.", bsp:"Proteasen werden erst im Zwölffingerdarm aktiv, damit sich das Organ nicht selbst verdaut."},
+    {tt:"Insulin als Schlüssel", kern:"Insulin öffnet die Zellen für Glucose und senkt so den Blutzucker.", bsp:"Ohne Insulin bleibt die Glucose im Blut - der Blutzucker bleibt erhöht."},
+    {tt:"Glucagon und die Leber", kern:"Fällt der Blutzucker, setzt Glucagon frei und die Leber wandelt Glykogen zurück in Glucose.", bsp:"Beim Sport zwischen den Mahlzeiten versorgt so das Leber-Glykogen die Zellen."},
+    {tt:"Typ 1 gegen Typ 2", kern:"Typ 1 ist Insulinmangel durch zerstörte Beta-Zellen, Typ 2 ist Insulinresistenz bei ausreichendem Insulin.", bsp:"Typ 1 beginnt meist jung und schnell, Typ 2 entsteht langsam durch Lebensstil."},
+    {tt:"Zucker wird zu Fett", kern:"Ist der Glykogenspeicher der Leber voll, wird überschüssige Glucose in Fett umgewandelt.", bsp:"Dauernder Kohlenhydratüberschuss plus Bewegungsmangel führt zu Übergewicht."}
+  ],
+  fragen:[
+    {frage:"Welche Aufgaben hat die Bauchspeicheldrüse?", muster:"Sie produziert einerseits über 30 verschiedene Verdauungsenzyme und andererseits Hormone, die den Blutzuckerspiegel regulieren.", check:["Verdauungsenzyme (exokrin)","Hormone zur Blutzuckerregulation (endokrin)","über 30 verschiedene Enzyme"]},
+    {frage:"Wie entsteht bei der Verdauung Glucose, welche Aufgabe hat sie und wie gelangt sie in die Zellen?", muster:"Glucose entsteht bei der Verdauung von Kohlenhydraten und gelangt über die Dünndarmschleimhaut ins Blut. Zellen nehmen sie zur Energiegewinnung auf. Damit sie in insulinempfindliche Zellen kommt, braucht es Insulin als 'Türöffner'.", check:["entsteht aus Kohlenhydraten","gelangt über die Dünndarmschleimhaut ins Blut","dient der Energiegewinnung","Insulin als Türöffner in die Zellen"]},
+    {frage:"Welche Massnahmen können eine geschwächte Bauchspeicheldrüse entlasten?", muster:"Entlastend wirken:<ul><li>leicht verdauliche, überwiegend vegetarische Kost</li><li>weniger Fett (vor allem tierisches)</li><li>bei Fettunverträglichkeit MCT-Öl</li><li>weniger raffinierte Kohlenhydrate</li><li>kein Alkohol</li><li>schonende Zubereitung</li><li>kleinere Mahlzeiten</li><li>enzymreiche Früchte</li><li>bei Bedarf Enzympräparate</li></ul>", check:["leicht verdaulich, vegetarisch","weniger Fett, weniger raffinierte Kohlenhydrate","Alkohol meiden","kleinere Mahlzeiten","enzymreiche Früchte oder Enzympräparate"]},
+    {frage:"Hat eine geschwächte Bauchspeicheldrüse neben dem Enzymmangel zwangsläufig Diabetes zur Folge?", muster:"Nein. Die Enzymproduktion findet unabhängig von der Insulinproduktion statt. Ein Diabetes kann sich aber parallel entwickeln, wenn die Langerhans-Inseln durch Fehlernährung und andere Faktoren dauerhaft überfordert werden.", check:["nein, nicht zwangsläufig","Enzyme unabhängig von Insulin","Diabetes parallel möglich bei dauernder Überforderung der Langerhans-Inseln"]},
+    {frage:"Was unterscheidet einen Diabetes Typ 1 von einem Diabetes Typ 2?", muster:"Bei Typ 1 besteht Insulinmangel, weil das Immunsystem die Beta-Zellen angreift (genetische Veranlagung plus Auslöser). Bei Typ 2 wird genug Insulin gebildet, doch die Zellen sind insulinresistent und nehmen zu wenig Glucose auf, sodass der Blutzucker dauerhaft erhöht ist.", check:["Typ 1: Insulinmangel, Beta-Zellen zerstört","Typ 1: genetische Veranlagung plus Auslöser","Typ 2: genug Insulin, aber Insulinresistenz","Typ 2: Blutzucker ständig erhöht"]},
+    {frage:"Inwiefern ist Diabetes Typ 2 ernährungsbedingt und kann er durch veränderte Ernährung beseitigt werden?", muster:"Eine andauernde ungünstige Ernährung mit zu vielen raffinierten Kohlenhydraten und Fetten ist immer an der Entstehung beteiligt. Umgekehrt kann eine Ernährungsumstellung mit weiteren Massnahmen die Erkrankung im besten Fall völlig ausheilen, mindestens aber deutlich verbessern.", check:["Übermass an raffinierten Kohlenhydraten und Fetten beteiligt","Ernährungsumstellung plus weitere Massnahmen","im besten Fall völlige Ausheilung","auf jeden Fall deutliche Besserung"]},
+    {frage:"Warum macht zu viel Zucker dick?", muster:"Die Leber kann nur eine begrenzte Menge Glucose als Glykogen speichern. Sind die Speicher voll, wird der Zuckerüberschuss in Fett umgewandelt und im Fettgewebe eingelagert. So trägt eine kohlenhydratreiche Ernährung erheblich zum Übergewicht bei.", check:["Leber speichert nur begrenzt Glykogen","Überschuss wird in Fett umgewandelt","Einlagerung im Fettgewebe","kohlenhydratreiche Kost fördert Übergewicht"]},
+    {frage:"Wie deckt der Körper seinen Energiebedarf, wenn nicht genug Glucose zur Verfügung steht?", muster:"Ein Glucosemangel veranlasst die Bauchspeicheldrüse, Glucagon zu bilden. Dieses signalisiert der Leber, Glykogen zu Glucose abzubauen, und setzt zudem Fettreserven frei. Statt Zucker werden dann Fette verbrannt - der Energiebedarf ist gedeckt und Körperfett wird abgebaut.", check:["Bauchspeicheldrüse bildet Glucagon","Leber baut Glykogen zu Glucose ab","Glucagon setzt Fettreserven frei","Fettverbrennung deckt den Bedarf und baut Gewicht ab"]},
+    {frage:"Worin liegt die auffällig schlechte Wundheilung bei Diabetikern begründet?", muster:"Ein dauerhaft erhöhter Blutzucker verdickt das Blut und die Blutgefässwände und nimmt ihnen die Elastizität. Die schlechte Durchblutung führt zu Mangel an Sauerstoff, Nährstoffen sowie an Leukozyten und Thrombozyten. Wunden werden dadurch schlechter verschlossen und Erreger schlechter bekämpft.", check:["Blut und Gefässwände verdickt, unelastisch","schlechte Durchblutung","Mangel an Thrombozyten - Wunde schliesst schlecht","Mangel an Leukozyten - Erreger werden schlechter bekämpft"]},
+    {frage:"Hans Schwergewicht (137 kg, wenig Bewegung, fett- und zuckerreiche Kost) hat Insulinresistenz und erhöhten Blutzucker - was könnte er tun, um wieder fit zu werden?", muster:"Er muss Ernährung und Lebensweise gravierend ändern:<ul><li>deutlich weniger fett- und kohlenhydratreiche Nahrungsmittel</li><li>statt Erdnüssen und Chips etwa Dinkelkräcker</li><li>statt abendlichem Fernsehen regelmässige Bewegung wie ein ausgiebiger Abendspaziergang</li></ul>", check:["Ernährung und Lebensweise gravierend ändern","weniger Fett und Kohlenhydrate","gesündere Snacks statt Chips und Erdnüssen","regelmässige Bewegung, z. B. Abendspaziergang"]}
+  ]
+},
+  {
+  id:"m1u7", nr:7, titel:"Die Nieren und der Harnapparat",
+  unter:"Filter, Harnbildung, Wasserhaushalt",
+  videos: MODUL1_VIDEOS,
+  lessons:[
+    {titel:"Überblick und Aufgaben der Nieren", html:`<p>Die Niere ist ein <b>paariges Organ</b>, dessen Hauptzweck die <b>Blutreinigung</b> ist. Fällt eine Niere aus, kann die andere sie vertreten. Die Nieren liegen in der Lendengegend unterhalb des Zwerchfells, rechts und links der Wirbelsäule (rechte Niere unter der Leber, linke unter der Milz).</p><p>Die Nieren leisten weit mehr als nur Urinausscheidung. Sie sind zugleich <b>Ausscheidungs-, Produktions- und Steuerungsorgane</b>. Ihre Aufgaben:</p><ul><li>Reinigung des Blutes: Ausscheidung von Kreatinin, Harnstoff und Harnsäure (alle aus dem Proteinstoffwechsel), von giftigen Stoffen und Medikamentenrückständen, von überschüssigen Mineralstoffen und Wasser</li><li>Regulation des Wasser- und Mineralstoffhaushalts sowie des Säure-Basen-Gleichgewichts</li><li>Hormonproduktion: Renin (Blutdruck), Erythropoetin/EPO (Blutbildung) und Umwandlung von Vitamin D in seine aktive Form</li></ul><div class="merk"><b>Merke:</b> Über Renin, EPO und aktives Vitamin D nehmen die Nieren Einfluss auf Blutdruck, Blutbildung und Knochendichte.</div>`},
+    {titel:"Aufbau und Harnbildung", html:`<p>Optisch bestehen die Nieren aus drei Bereichen: der helleren <b>Nierenrinde</b> (aussen), dem dunkleren <b>Nierenmark</b> (innen) und dem <b>Nierenbecken</b>, das die Erweiterung der Harnleiter zu einem Sammelgefäss darstellt. In der Nierenrinde sitzen die <b>Nephronen</b> - die winzigen Funktionseinheiten der Niere, von denen jede Niere über eine Million besitzt. Sie filtern Abfallstoffe aus dem Blut und bilden den Urin.</p><p>Täglich fliessen rund 1.500 Liter Blut durch die Nieren; das gesamte Blut eines Erwachsenen (5-6 Liter) wird etwa 270 Mal am Tag gefiltert. Dabei entstehen pro Minute etwa 125 Milliliter (täglich rund 180 Liter) <b>Primärharn</b> - die unkonzentrierte Vorstufe des Urins mit viel Wasser, Mineralstoffen und Zucker.</p><p>Der Grossteil von Wasser und Mineralstoffen wird aus dem Primärharn wieder ins Blut zurückgeholt, so dass aus etwa 125 Millilitern Primärharn nur rund ein Milliliter Urin übrig bleibt. Abfallstoffe verbleiben im Urin.</p><div class="merk"><b>Merke:</b> Würde der Primärharn direkt ausgeschieden, käme das einer riesigen Wasser- und Mineralstoffverschwendung gleich.</div>`},
+    {titel:"Der Urin und seine Bestandteile", html:`<p>Ein Erwachsener scheidet täglich etwa <b>0,5 bis 2 Liter</b> Urin aus. Er besteht hauptsächlich aus Wasser, dazu Abbauprodukte des Proteinstoffwechsels, Mineralstoffe sowie geringe Mengen Proteine und Zucker.</p><p>Die drei »harnpflichtigen« Substanzen aus dem Proteinstoffwechsel:</p><ul><li><b>Kreatinin</b> - entsteht beim Abbau von Kreatin; steigende Blutwerte weisen auf eine mögliche Nierenfunktionsstörung hin</li><li><b>Harnsäure</b> - Endprodukt des Purinstoffwechsels; bei zu hoher Konzentration (Hyperurikämie) entstehen Kristalle, die Gichtanfälle auslösen</li><li><b>Harnstoff</b> - entsteht immer beim Proteinabbau; wird zu 90 Prozent über die Nieren ausgeschieden</li></ul><p>Der Urin verrät viel: Farbe (hellgelb und klar ist gesund; trüb kann auf Infektionen deuten, rötlich auf Blut), Geruch (stechend/ammoniakartig bei bakterieller Infektion, nach Nagellackentferner bei Ketonkörpern) und Werte wie der MMS-Wert, der einen Vitamin-B12-Mangel früh anzeigt.</p><div class="merk"><b>Merke:</b> Der Urin kann je nach Bedarf verdünnt (bei Wasserüberschuss) oder konzentriert (bei Wassermangel) ausgeschieden werden - so regulieren die Nieren den Wasser- und Mineralstoffhaushalt.</div>`},
+    {titel:"Der Harnapparat und Blutdruck", html:`<p>Zum <b>Harnapparat</b> gehören neben den beiden Nieren die zwei <b>Harnleiter</b> (befördern den Urin in die Blase), die <b>Harnblase</b> (sammelt den Urin, bis Harndrang entsteht) und die <b>Harnröhre</b> (führt den Urin nach aussen).</p><p>Bei niedrigem Blutdruck, Flüssigkeitsmangel oder schlechter Durchblutung bilden die Nieren das Hormon <b>Renin</b>, das den Blutdruck erhöht und die Nierendurchblutung verbessert. Ist eine Niere dauerhaft schlecht durchblutet, bildet sie dauerhaft vermehrt Renin - die Folge ist oft ein erhöhter Blutdruck.</p><p>Umgekehrt kann ein aus anderen Gründen bestehender Bluthochdruck die Nieren langfristig überlasten. Ein dauerhaft erhöhter Blutdruck gilt daher als Risikofaktor für chronisches Nierenversagen.</p><div class="merk"><b>Merke:</b> Niere und Blutdruck bedingen sich wechselseitig - deshalb gehört bei Bluthochdruck immer auch die Nierenfunktion geprüft.</div>`},
+    {titel:"Erkrankungen und Risikofaktoren", html:`<p>Begünstigende Faktoren für Erkrankungen des Harnapparates sind unter anderem: <b>unzureichende Blutversorgung</b> der Nieren (z. B. durch Unfall oder niedrigen Blutdruck), <b>Schmerzmittelmissbrauch</b>, <b>Geschlechtsverkehr</b> (Risiko für Blasenentzündungen bei Frauen), <b>Diabetes mellitus</b> (hoher Blutzucker schädigt die kleinen Blutgefässe) und zu hohe <b>Harnsäurewerte</b>.</p><p>Wichtige Krankheitsbilder:</p><ul><li><b>Nierensteine</b> - am häufigsten Calciumsteine, dann Harnsäuresteine; entstehen bei zu hoher Konzentration bestimmter Substanzen und zu wenig Urin</li><li><b>Blasenentzündung</b> - meist durch Bakterien über die Harnröhre; betrifft vorwiegend Frauen (kürzere Harnröhre)</li><li><b>Nierenbeckenentzündung</b> - Bakterien steigen über den Harnleiter auf; mit Fieber und Flankenschmerz</li><li><b>Nierenversagen</b> - erst der Ausfall beider Nieren ist kritisch; dann hilft nur Dialyse oder Transplantation</li></ul><div class="merk"><b>Merke:</b> Eine nicht ausgeheilte Blasenentzündung kann über die Nierenbecken bis zum Nierenversagen führen.</div>`},
+    {titel:"Ganzheitliche Massnahmen", html:`<p>Zur Vorbeugung von Nierensteinen und zum Schutz der Harnwege sind folgende Massnahmen hilfreich:</p><ul><li><b>Wasser trinken</b> - so viel reines, kohlensäurefreies Wasser, dass 1 bis 2 Liter möglichst farbloser Urin ausgeschieden werden</li><li><b>Zitronensaft</b> - das enthaltene Citrat hemmt die Bildung calciumhaltiger Steine (z. B. als ungesüsste Limonade)</li><li><b>Tierische Proteine reduzieren</b> - entlastet die Nieren und senkt das Harnsäureaufkommen</li><li><b>Weniger Salz</b> - hohe Salzzufuhr steigert die Calciumausscheidung über den Urin</li><li><b>Brennnesseln</b> - wirken entzündungshemmend und harntreibend</li></ul><p>Bei einer Blasenentzündung helfen Wärme, viel trinken, das Meiden von Zucker sowie Blasentees (Birke, Brennnessel, Goldrute, Bärentraube). Cranberries und D-Mannose können vorbeugend wirken, indem sie das Anheften der Bakterien an den Schleimhäuten erschweren.</p><div class="merk"><b>Merke:</b> Reichliches Trinken - auch abends - ist die einfachste und wirksamste Vorbeugung gegen Nierensteine.</div>`}
+  ],
+  karten:[
+    {tt:"Nephron", kern:"Die winzige Funktionseinheit der Niere in der Nierenrinde, die das Blut filtert und Urin bildet.", bsp:"Jede Niere besitzt über eine Million Nephronen."},
+    {tt:"Primärharn", kern:"Unkonzentrierte Vorstufe des Urins mit viel Wasser, Mineralstoffen und Zucker.", bsp:"Aus rund 125 ml Primärharn pro Minute bleibt etwa 1 ml Urin übrig, der Rest geht zurück ins Blut."},
+    {tt:"Harnpflichtige Substanzen", kern:"Abbauprodukte des Proteinstoffwechsels, die über den Harn ausgeschieden werden müssen.", bsp:"Kreatinin, Harnsäure und Harnstoff."},
+    {tt:"Renin", kern:"Nierenhormon, das den Blutdruck erhöht und die Nierendurchblutung verbessert.", bsp:"Bei dauerhaft schlecht durchbluteter Niere entsteht durch vermehrtes Renin oft Bluthochdruck."},
+    {tt:"Erythropoetin (EPO)", kern:"Nierenhormon, das das Knochenmark zur Bildung roter Blutzellen anregt.", bsp:"Geschwächte Nieren bilden weniger EPO - eine Anämie kann entstehen."},
+    {tt:"Hyperurikämie", kern:"Zu hohe Harnsäurekonzentration im Blut, aus der sich Kristalle bilden.", bsp:"Übergewicht und viel Alkohol begünstigen sie und damit Gichtanfälle und Harnsäuresteine."}
+  ],
+  fragen:[
+    {frage:"Welche Aufgaben haben die Nieren?", muster:"Die Nieren sind die »Kläranlage« des Körpers. Ihre Aufgaben:<ul><li>Ausscheidung von Stoffwechselendprodukten (Harnstoff, Kreatinin, Harnsäure), körperfremden Stoffen und überschüssigen Mineralien</li><li>Regulation des Wasser- und Mineralstoffhaushalts</li><li>Blutdruckregulation über das Hormon Renin</li><li>Unterstützung der Blutbildung über EPO</li><li>Umwandlung von Vitamin D in seine aktive Form</li></ul>", check:["Blutreinigung/Ausscheidung von Stoffwechselendprodukten","Regulation von Wasser-, Mineralstoff- und Säure-Basen-Haushalt","Blutdruckregulation über Renin","Blutbildung über EPO und Vitamin-D-Aktivierung"]},
+    {frage:"Wieso sollte ein Therapeut bei Bluthochdruck auch die Nierenfunktion untersuchen?", muster:"Die Ursache des Bluthochdrucks könnte eine geschädigte oder geschwächte Niere sein. Eine Schädigung geht meist mit schlechter Durchblutung einher. Da eine gute Durchblutung für die Nierenfunktion entscheidend ist, bildet die Niere bei Mangeldurchblutung vermehrt Renin, das den Blutdruck generell erhöht.", check:["Niere kann Ursache des Bluthochdrucks sein","Schädigung geht mit schlechter Durchblutung einher","Mangeldurchblutung führt zu vermehrter Reninbildung","Renin erhöht den Blutdruck im ganzen Körper"]},
+    {frage:"Welche Gefahr besteht, wenn eine Blasenentzündung nicht vollständig ausheilt?", muster:"Es besteht die Gefahr, dass Bakterien über den Harnleiter ins Nierenbecken gelangen und dort eine Nierenbeckenentzündung auslösen. Unbehandelt kann eine Nierenbeckenentzündung bis zum Nierenversagen führen.", check:["Bakterien steigen über den Harnleiter ins Nierenbecken auf","Es entsteht eine Nierenbeckenentzündung","Unbehandelt droht Nierenversagen"]},
+    {frage:"Wie erklären Sie sich, dass Menschen mit Nierenproblemen meist auch Probleme mit der Leber haben?", muster:"Bei eingeschränkter Nierenfunktion können Gifte nicht vollständig aus dem Blut gefiltert werden. Ein Teil verbleibt im Blut und gelangt zurück zur Leber. Da die Leber ohnehin grenzwertig belastet ist, führt das zusätzliche Giftaufkommen zur Überlastung. Umgekehrt belastet eine geschwächte Leber immer auch die Nieren.", check:["Ungefilterte Gifte bleiben im Blut","Sie gelangen zusätzlich zur Leber","Die ohnehin belastete Leber wird überfordert","Wechselseitige Belastung von Niere und Leber"]},
+    {frage:"Wieso und woran stirbt ein Mensch bei Funktionsverlust der Nieren ohne regelmässige Dialyse?", muster:"Bei komplettem Nierenversagen kommt es innerhalb kürzester Zeit zu schwersten Vergiftungserscheinungen, da belastende Stoffwechselendprodukte und Giftstoffe nicht mehr ausgeschieden werden können. Nur regelmässige Dialysen oder eine Nierentransplantation ermöglichen das Überleben.", check:["Stoffwechselendprodukte und Gifte werden nicht mehr ausgeschieden","Es kommt zu schwerer Vergiftung des Körpers","Nur Dialyse oder Transplantation sichern das Überleben"]},
+    {frage:"Nennen Sie Faktoren, die eine Erkrankung der Nieren begünstigen können.", muster:"Begünstigend wirken:<ul><li>eine gestörte Durchblutung der Nieren (etwa bei Diabetes mellitus durch geschädigte kleine Blutgefässe)</li><li>die regelmässige Einnahme von Medikamenten über längere Zeit</li><li>Geschlechtsverkehr, der bei empfindlichen Frauen über bakterielle Verunreinigungen entzündliche Reaktionen wie Blasenentzündungen auslösen kann</li></ul>", check:["Gestörte Durchblutung, z. B. bei Diabetes mellitus","Langfristige Medikamenteneinnahme","Geschlechtsverkehr als Risiko bei empfindlichen Frauen"]},
+    {frage:"Welche Faktoren können die Bildung von Nierensteinen begünstigen?", muster:"Begünstigend sind:<ul><li>eine stark säurebildende Ernährung (viel Fleisch, Fisch, Milchprodukte, Teigwaren, Fertigprodukte, Alkohol, kohlensäurehaltige Getränke)</li><li>zu wenig stilles Wasser</li><li>hoher Salzkonsum (regt die Calciumausscheidung an und fördert Calciumsteine)</li><li>Übergewicht und Alkohol, die zu einer Hyperurikämie und damit zu Harnsäuresteinen führen können</li></ul>", check:["Stark säurebildende Ernährung","Zu geringe Trinkmenge an stillem Wasser","Hoher Salzkonsum fördert Calciumsteine","Übergewicht und Alkohol führen zu Harnsäuresteinen"]},
+    {frage:"Welche Nahrungsmittel sollte man bei einer Gichterkrankung meiden und warum? Nennen Sie Beispiele.", muster:"Purinreiche Nahrungsmittel sollten gemieden oder stark reduziert werden, zum Beispiel:<ul><li>Innereien</li><li>Fleisch</li><li>Fisch</li><li>Meerestiere</li><li>Hülsenfrüchte</li></ul>Beim Abbau stark purinhaltiger Lebensmittel entsteht sehr viel Harnsäure, die die Nieren nicht vollständig ausscheiden können. Steigt die Harnsäure im Blut über einen bestimmten Wert, bilden sich Kristalle, die sich in Gewebe und Gelenken ablagern und Gichtanfälle auslösen. Empfohlen wird eine basenüberschüssige Ernährung.", check:["Purinreiche Lebensmittel meiden: Innereien, Fleisch, Fisch, Meerestiere, Hülsenfrüchte","Beim Abbau entsteht viel Harnsäure","Harnsäurekristalle lagern sich in Gelenken ab und lösen Gicht aus","Basenüberschüssige Ernährung empfohlen"]},
+    {frage:"Was versteht man unter dem Primärharn? Warum ist es wichtig, dass er nicht über die Niere ausgeschieden wird?", muster:"Der Primärharn ist die unkonzentrierte Vorstufe des Urins. Würde er ausgeschieden, käme es zu grossen Wasser- und Mineralstoffverlusten.", check:["Primärharn ist die unkonzentrierte Vorstufe des Urins","Ausscheidung würde zu grossen Wasser- und Mineralstoffverlusten führen"]}
+  ]
+}
+];
+
+/* kommende Themen (noch nicht befüllt) */
+const KOMMEND = [];
+
+/* ========================= APP-LOGIK ========================= */
+const $=id=>document.getElementById(id);
+const views=["home","modus","lernen","videos","karten","quiz","result"];
+function show(v){views.forEach(x=>$("view-"+x).classList.toggle("hidden",x!==v));window.scrollTo(0,0);}
+let cur=null;         // aktuelles Thema
+let lessonIdx=0;      // Lern-Seite
+let quiz=null;        // Quiz-Zustand
+
+/* Fortschritt speichern */
+function loadProg(){try{return JSON.parse(localStorage.getItem("nhk_prog"))||{}}catch(e){return{}}}
+function saveProg(p){try{localStorage.setItem("nhk_prog",JSON.stringify(p))}catch(e){}}
+
+/* --- Home: Themenliste --- */
+function renderHome(){
+  const prog=loadProg();
+  let h="";
+  THEMEN.forEach(t=>{
+    const done=prog[t.id]?` · ${prog[t.id].richtig||0}/${t.fragen.length} geübt`:"";
+    h+=`<button class="thema" onclick="openThema('${t.id}')">
+      <div class="no">${t.nr}</div>
+      <div class="tt"><b>${t.titel}</b><span>${t.unter}${done}</span></div>
+      <div class="arw">›</div></button>`;
+  });
+  KOMMEND.forEach((titel,i)=>{
+    h+=`<div class="thema locked">
+      <div class="no">${THEMEN.length+i+1}</div>
+      <div class="tt"><b>${titel}</b><span>kommt bald</span></div>
+      <div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div></div>`;
+  });
+  $("themenliste").innerHTML=h;
+  const anz=Object.keys(prog).length;
+  $("homeprog").textContent=anz?`Du hast ${anz} von ${THEMEN.length+KOMMEND.length} Themen begonnen.`:"Wähle ein Thema, um zu starten.";
+}
+function goHome(){cur=null;renderHome();show("home");}
+function openThema(id){cur=THEMEN.find(t=>t.id===id);$("modus-thema").textContent="Thema "+cur.nr+": "+cur.titel;show("modus");}
+function backToModus(){show("modus");}
+
+/* --- Lernen --- */
+function startLernen(){lessonIdx=0;renderLesson();show("lernen");}
+function renderLesson(){
+  const L=cur.lessons[lessonIdx];
+  $("lernprog").textContent=`Abschnitt ${lessonIdx+1} von ${cur.lessons.length}`;
+  $("lessonbox").innerHTML=`<h3>${L.titel}</h3>${L.html}`;
+  $("lprev").style.visibility=lessonIdx===0?"hidden":"visible";
+  $("lnext").textContent=lessonIdx===cur.lessons.length-1?"Fertig":"Weiter";
+}
+function lessonStep(d){
+  if(lessonIdx===cur.lessons.length-1 && d>0){backToModus();return;}
+  lessonIdx=Math.max(0,Math.min(cur.lessons.length-1,lessonIdx+d));renderLesson();
+}
+
+/* --- Videos --- */
+function startVideos(){
+  let h="";
+  (cur.videos||[]).forEach(v=>{
+    if(v.file){
+      h+=`<div class="ownvideo"><b>${v.t}</b><span>${v.d}</span><video controls preload="metadata" src="${v.file}"></video></div>`;
+    } else {
+      h+=`<div class="videocard">
+        <div class="vic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10.5 9.2l4 2.8-4 2.8z"/></svg></div>
+        <div class="vt"><b>${v.t}</b><span>${v.d}</span></div>
+        <a class="vbtn" href="${v.url}" target="_blank" rel="noopener">Ansehen</a></div>`;
+    }
+  });
+  $("videoliste").innerHTML=h||"<p style='color:var(--muted)'>Für dieses Thema sind keine Videos hinterlegt.</p>";
+  show("videos");
+}
+
+/* --- Wissenskarten --- */
+function startKarten(){
+  $("karten-thema").textContent="Wissenskarten: "+cur.titel;
+  let h="";
+  cur.karten.forEach(k=>{
+    h+=`<div class="karte"><b class="tt">${k.tt}</b><div class="kern">${k.kern}</div>${k.bsp?`<div class="bsp">Beispiel: ${k.bsp}</div>`:""}</div>`;
+  });
+  $("kartenliste").innerHTML=h;
+  show("karten");
+}
+
+/* --- Üben (Quiz) --- */
+function startUeben(){
+  quiz={i:0,gut:0,mittel:0,schlecht:0};
+  renderQuestion();show("quiz");
+}
+function renderQuestion(){
+  const q=cur.fragen[quiz.i];
+  const total=cur.fragen.length;
+  $("qprogbar").style.width=((quiz.i)/total*100)+"%";
+  $("qcount").textContent=`${quiz.i+1} / ${total}`;
+  $("qcard").innerHTML=`
+    <div class="qtext">${q.frage}</div>
+    <p style="font-size:.85rem;color:var(--muted)">Überlege (oder notiere) deine Antwort, dann aufdecken.</p>
+    <button class="btn primary" style="margin-top:12px" onclick="revealAnswer()">Musterlösung zeigen</button>
+    <div class="reveal" id="reveal">
+      <h4>Musterlösung</h4>
+      <div class="body">${q.muster}</div>
+      <ul class="check">${q.check.map(c=>`<li>${c}</li>`).join("")}</ul>
+      <p style="font-size:.85rem;color:var(--muted);margin-top:12px">Wie gut wusstest du es?</p>
+      <div class="selfrow">
+        <button class="self g" onclick="rate('gut')">Sicher</button>
+        <button class="self y" onclick="rate('mittel')">Teilweise</button>
+        <button class="self r" onclick="rate('schlecht')">Nochmal</button>
+      </div>
+    </div>`;
+}
+function revealAnswer(){$("reveal").classList.add("show");}
+function rate(r){
+  quiz[r]++;
+  if(quiz.i<cur.fragen.length-1){quiz.i++;renderQuestion();}
+  else finishQuiz();
+}
+function finishQuiz(){
+  const total=cur.fragen.length;
+  const prog=loadProg();
+  prog[cur.id]={richtig:quiz.gut,total:total,ts:Date.now()};
+  saveProg(prog);
+  $("resring").textContent=quiz.gut+" / "+total;
+  $("restext").textContent=`Sicher: ${quiz.gut} · Teilweise: ${quiz.mittel} · Nochmal: ${quiz.schlecht}. Wiederhole die „Nochmal"-Themen im Lernmodus.`;
+  show("result");
+}
+
+/* Start */
+renderHome();show("home");
+</script>
+</body>
+</html>
